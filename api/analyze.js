@@ -36,7 +36,7 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error('Gemini error:', err.message)
     const fallback = ruleBasedAnalysis(d)
-    res.status(200).json({ ...fallback, isRuleBased: true })
+    res.status(200).json({ ...fallback, isRuleBased: true, _debug: err.message })
   }
 }
 
