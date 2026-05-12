@@ -181,7 +181,7 @@ html, body {
   background: var(--bg);
 }
 .mobile-search-bar .search-input-wrapper {
-  border-radius: 10px; padding: 6px 8px 6px 14px;
+  border-radius: 10px; padding: 10px 12px 10px 16px; gap: 10px;
 }
 
 .results-content {
@@ -204,7 +204,7 @@ html, body {
   display: inline-block; font-size: 13px; font-weight: 500;
   font-family: 'JetBrains Mono', monospace; color: var(--accent);
   background: var(--accent-dim); border: 1px solid rgba(79, 142, 247, 0.2);
-  border-radius: 4px; padding: 2px 8px; margin-right: 8px;
+  border-radius: 4px; padding: 2px 8px; margin-right: 10px;
 }
 .company-sector { font-size: 13px; color: var(--text-muted); }
 .price-row {
@@ -389,7 +389,8 @@ html, body {
   .results-content { padding: 20px 16px 60px; }
 
   /* Company header */
-  .company-name   { font-size: 22px; }
+  .company-name   { font-size: 22px; margin-bottom: 8px; }
+  .company-ticker { font-size: 12px; padding: 3px 9px; margin-right: 6px; }
   .price-current  { font-size: 32px; letter-spacing: -0.5px; }
   .price-change   { font-size: 15px; }
 
