@@ -35,9 +35,8 @@ export default async function handler(req, res) {
     res.status(200).json(analysis)
   } catch (err) {
     console.error('Gemini error:', err.message)
-    console.error('API key present:', !!process.env.GEMINI_API_KEY)
     const fallback = ruleBasedAnalysis(d)
-    res.status(200).json({ ...fallback, isRuleBased: true, _debug: err.message })
+    res.status(200).json({ ...fallback, isRuleBased: true })
   }
 }
 
