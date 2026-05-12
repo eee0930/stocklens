@@ -31,7 +31,7 @@ export async function searchSymbol(query) {
 
 // 최근 6개월 OHLCV 히스토리
 export async function getChart(symbol) {
-  const history = await apiFetch(`/chart/${symbol}`)
+  const history = await apiFetch(`/chart?symbol=${encodeURIComponent(symbol)}`)
   if (!Array.isArray(history) || history.length === 0) {
     throw new Error(`${symbol}의 주가 데이터를 찾을 수 없습니다.`)
   }
@@ -41,7 +41,7 @@ export async function getChart(symbol) {
 // 펀더멘털 (실패해도 빈 객체 반환)
 export async function getQuoteSummary(symbol) {
   try {
-    return await apiFetch(`/summary/${symbol}`)
+    return await apiFetch(`/summary?symbol=${encodeURIComponent(symbol)}`)
   } catch {
     return {}
   }

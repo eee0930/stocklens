@@ -23,8 +23,8 @@ function stockDataPlugin() {
             const result = await yf.search(q, {}, { validateResult: false })
             send(200, result.quotes ?? [])
 
-          } else if (path.startsWith('/chart/')) {
-            const symbol = path.match(/\/chart\/([^?]+)/)?.[1]
+          } else if (path.startsWith('/chart')) {
+            const symbol = new URL(`http://x${path}`).searchParams.get('symbol')
             const sixMoAgo = new Date(Date.now() - 183 * 24 * 60 * 60 * 1000)
             const history = await yf.historical(symbol, {
               period1: sixMoAgo,
@@ -33,8 +33,8 @@ function stockDataPlugin() {
             }, { validateResult: false })
             send(200, history)
 
-          } else if (path.startsWith('/summary/')) {
-            const symbol = path.match(/\/summary\/([^?]+)/)?.[1]
+          } else if (path.startsWith('/summary')) {
+            const symbol = new URL(`http://x${path}`).searchParams.get('symbol')
             const summary = await yf.quoteSummary(symbol, {
               modules: ['financialData', 'defaultKeyStatistics', 'assetProfile', 'summaryDetail'],
             }, { validateResult: false })
