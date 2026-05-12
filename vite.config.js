@@ -69,7 +69,7 @@ function geminiPlugin() {
           const d = JSON.parse(body)
           try {
             const { GoogleGenerativeAI } = await import('@google/generative-ai')
-            const apiKey = process.env.GEMINI_API_KEY || 'AIzaSyAxWslpkLjrM86HdE3hdO919cpqikX5Lks'
+            const apiKey = process.env.GEMINI_API_KEY
             const genAI = new GoogleGenerativeAI(apiKey)
             // gemini-2.0-flash-lite 먼저 시도, 실패 시 gemini-1.5-flash
             let result

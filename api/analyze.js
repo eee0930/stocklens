@@ -7,7 +7,7 @@ export default async function handler(req, res) {
 
   try {
     const { GoogleGenerativeAI } = await import('@google/generative-ai')
-    const apiKey = process.env.GEMINI_API_KEY || 'AIzaSyAxWslpkLjrM86HdE3hdO919cpqikX5Lks'
+    const apiKey = process.env.GEMINI_API_KEY
     const genAI = new GoogleGenerativeAI(apiKey)
 
     let result
