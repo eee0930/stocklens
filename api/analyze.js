@@ -17,7 +17,13 @@ export default async function handler(req, res) {
         result = await model.generateContent(buildPrompt(d))
         break
       } catch (e) {
-        if (!e.message?.includes('quota') && !e.message?.includes('not found')) throw e
+        const retryable = e.message?.includes('quota') ||
+                          e.message?.includes('not found') ||
+                          e.message?.includes('503') ||
+                          e.message?.includes('unavailable') ||
+                          e.message?.includes('overloaded') ||
+                          e.message?.includes('high demand')
+        if (!retryable) throw e
       }
     }
 
@@ -36,7 +42,7 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error('Gemini error:', err.message)
     const fallback = ruleBasedAnalysis(d)
-    res.status(200).json({ ...fallback, isRuleBased: true, _debug: err.message })
+    res.status(200).json({ ...fallback, isRuleBased: true })
   }
 }
 
