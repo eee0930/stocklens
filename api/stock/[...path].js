@@ -1,8 +1,8 @@
 export default async function handler(req, res) {
-  const segments = Array.isArray(req.query.path)
-    ? req.query.path
-    : [req.query.path].filter(Boolean)
-  const route = segments[0]
+  // req.url 예: /api/stock/search?q=AAPL  |  /api/stock/chart/AAPL
+  const url    = new URL(req.url, 'http://x')
+  const path   = url.pathname.replace(/^\/api\/stock/, '')   // → /search, /chart/AAPL, ...
+  const params = url.searchParams
 
   const send = (status, data) => res.status(status).json(data)
 
@@ -10,13 +10,13 @@ export default async function handler(req, res) {
     const { default: YahooFinance } = await import('yahoo-finance2')
     const yf = new YahooFinance({ suppressNotices: ['ripHistorical'] })
 
-    if (route === 'search') {
-      const q = req.query.q
+    if (path.startsWith('/search')) {
+      const q = params.get('q')
       const result = await yf.search(q, {}, { validateResult: false })
       send(200, result.quotes ?? [])
 
-    } else if (route === 'chart') {
-      const symbol = segments[1]
+    } else if (path.startsWith('/chart/')) {
+      const symbol = path.match(/\/chart\/([^?]+)/)?.[1]
       const sixMoAgo = new Date(Date.now() - 183 * 24 * 60 * 60 * 1000)
       const history = await yf.historical(symbol, {
         period1: sixMoAgo,
@@ -25,8 +25,8 @@ export default async function handler(req, res) {
       }, { validateResult: false })
       send(200, history)
 
-    } else if (route === 'summary') {
-      const symbol = segments[1]
+    } else if (path.startsWith('/summary/')) {
+      const symbol = path.match(/\/summary\/([^?]+)/)?.[1]
       const summary = await yf.quoteSummary(symbol, {
         modules: ['financialData', 'defaultKeyStatistics', 'assetProfile', 'summaryDetail'],
       }, { validateResult: false })
