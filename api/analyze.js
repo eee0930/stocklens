@@ -1,9 +1,31 @@
+// 서버 사이드 캐시 (Vercel warm instance 동안 공유 — 모든 사용자 공유)
+const serverCache = new Map() // symbol → { analysis, dateKey }
+
+function getServerCached(symbol) {
+  const today = new Date().toISOString().slice(0, 10)
+  const entry = serverCache.get((symbol || '').toUpperCase())
+  if (!entry || entry.dateKey !== today || entry.analysis?.isRuleBased) return null
+  return entry.analysis
+}
+
+function setServerCached(symbol, analysis) {
+  if (!symbol) return
+  serverCache.set(symbol.toUpperCase(), {
+    analysis,
+    dateKey: new Date().toISOString().slice(0, 10),
+  })
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
   const d = req.body
+
+  // 서버 캐시 히트 → Gemini 호출 없이 바로 반환
+  const cached = getServerCached(d.symbol)
+  if (cached) return res.status(200).json(cached)
 
   try {
     const apiKey = process.env.GEMINI_API_KEY
@@ -52,7 +74,13 @@ export default async function handler(req, res) {
       }
     }
 
-    if (text === null) throw new Error(modelErrors.join(' | '))
+    if (text === null) {
+      const isQuota = modelErrors.some(e => e.includes('quota') || e.includes('429'))
+      throw new Error(isQuota
+        ? 'Gemini 무료 할당량 초과 — 잠시 후 다시 시도하거나 Google AI Studio에서 결제를 활성화하세요.'
+        : modelErrors.join(' | ')
+      )
+    }
 
     let analysis
     try {
@@ -62,6 +90,7 @@ export default async function handler(req, res) {
       analysis = { score: 50, recommendation: '중립', outlook: text, reasons: [], risks: [] }
     }
 
+    setServerCached(d.symbol, analysis)
     res.status(200).json(analysis)
   } catch (err) {
     console.error('Gemini error:', err.message)
