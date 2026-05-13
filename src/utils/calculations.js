@@ -55,8 +55,8 @@ export function processStockData(history, summary) {
   const priceVs52High = high52 ? ((currentPrice - high52) / high52) * 100 : null
   const priceVs52Low  = low52  ? ((currentPrice - low52)  / low52)  * 100 : null
 
-  // 차트 데이터 (최근 90일, 시간순)
-  const chartDays = asc.slice(-90)
+  // 차트 데이터 (전체, 시간순)
+  const chartDays = asc
   const chartData = chartDays.map(r => ({
     time:  toDateStr(r.date),
     open:  r.open,
@@ -77,7 +77,7 @@ export function processStockData(history, summary) {
     return asc.map((r, i) => {
       const si = i - pad
       return si >= 0 ? { time: toDateStr(r.date), value: +s[si].toFixed(4) } : null
-    }).filter(Boolean).slice(-90)
+    }).filter(Boolean)
   })()
 
   // 펀더멘털

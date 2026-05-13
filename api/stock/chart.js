@@ -3,9 +3,9 @@ export default async function handler(req, res) {
   try {
     const { default: YahooFinance } = await import('yahoo-finance2')
     const yf = new YahooFinance({ suppressNotices: ['ripHistorical'] })
-    const sixMoAgo = new Date(Date.now() - 183 * 24 * 60 * 60 * 1000)
+    const twoYrsAgo = new Date(Date.now() - 2 * 365 * 24 * 60 * 60 * 1000)
     const history = await yf.historical(symbol, {
-      period1: sixMoAgo,
+      period1: twoYrsAgo,
       period2: new Date(),
       interval: '1d',
     }, { validateResult: false })
