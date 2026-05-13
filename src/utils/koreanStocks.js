@@ -94,6 +94,12 @@ const KR_MAP = [
   { names: ['레인보우로보틱스'],                  symbol: '277810.KQ', shortname: '레인보우로보틱스' },
   { names: ['한화로보틱스'],                      symbol: '012450.KS', shortname: '한화에어로스페이스' },
   { names: ['리노공업'],                          symbol: '058470.KQ', shortname: '리노공업' },
+
+  // ── 국내 ETF (미국 지수 추종)
+  { names: ['kodex 미국나스닥100', 'kodex 나스닥100', '코덱스 나스닥100', '코덱스 미국나스닥100'], symbol: '379800.KS', shortname: 'KODEX 미국나스닥100' },
+  { names: ['tiger 미국s&p500', 'tiger s&p500', '타이거 s&p500', '타이거 미국s&p500'],            symbol: '360750.KS', shortname: 'TIGER 미국S&P500' },
+  { names: ['kodex 200', '코덱스 200'],           symbol: '069500.KS', shortname: 'KODEX 200' },
+  { names: ['tiger 200', '타이거 200'],           symbol: '102110.KS', shortname: 'TIGER 200' },
 ]
 
 // 한글 포함 여부 판별

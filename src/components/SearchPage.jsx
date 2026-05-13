@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-const US_EXAMPLES = ['AAPL', 'NVDA', 'TSLA', 'MSFT', 'SPY']
-const KR_EXAMPLES = ['삼성전자', 'SK하이닉스', '네이버', '카카오', '현대차']
+const US_EXAMPLES = ['NVDA', 'SMH', 'SCHD', 'VOO', 'QQQ']
+const KR_EXAMPLES = ['삼성전자', 'SK하이닉스', '현대차', 'KODEX 미국나스닥100', 'TIGER 미국S&P500']
 
 export default function SearchPage({ onSearch }) {
   const [query, setQuery] = useState('')
