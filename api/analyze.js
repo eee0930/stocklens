@@ -62,7 +62,7 @@ export default async function handler(req, res) {
     let text = null
     const modelErrors = []
     for (let i = 0; i < models.length; i++) {
-      if (i > 0) await sleep(1500)
+      if (i > 0) await sleep(1000)
       try {
         text = await callGemini(models[i])
         break
@@ -70,8 +70,8 @@ export default async function handler(req, res) {
         const msg = e.name === 'AbortError' ? '15s timeout' : e.message
         modelErrors.push(`[${models[i]}] ${msg}`)
         console.error(`Gemini error (${models[i]}):`, msg)
-        if (e.status === 400 || e.status === 403) throw e  // 인증 오류: 즉시 중단
-        if (e.status === 429) break                         // 분당 한도 초과: 다른 모델도 같으므로 즉시 규칙기반으로
+        if (e.status === 400 || e.status === 403) throw e  // 인증 오류만 즉시 중단
+        // 429(RPM) 포함 모든 다른 오류는 다음 모델로 — 각 모델은 별도 RPM 한도
       }
     }
 
