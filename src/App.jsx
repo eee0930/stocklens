@@ -42,12 +42,13 @@ export default function App() {
       processed.symbol      = symbol
       processed.companyName = processed.companyName || matches[0].shortname || matches[0].longname || symbol
 
-      // 4. Gemini AI 분석
+      // 4. Gemini AI 분석 (차트 배열은 AI가 필요 없으므로 제외)
       setStep(3)
+      const { chartData: _c, volumeData: _v, sma20Data: _s, ...aiPayload } = processed
       const aiRes = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(processed),
+        body: JSON.stringify(aiPayload),
       })
 
       if (!aiRes.ok) {
