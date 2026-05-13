@@ -61,8 +61,10 @@ export default async function handler(req, res) {
 
     let text = null
     const modelErrors = []
+
     for (let i = 0; i < models.length; i++) {
-      if (i > 0) await sleep(1000)
+      if (i > 0) await sleep(e429 ? 3000 : 1000) // 429 후엔 3초 대기
+      var e429 = false
       try {
         text = await callGemini(models[i])
         break
@@ -70,8 +72,20 @@ export default async function handler(req, res) {
         const msg = e.name === 'AbortError' ? '15s timeout' : e.message
         modelErrors.push(`[${models[i]}] ${msg}`)
         console.error(`Gemini error (${models[i]}):`, msg)
-        if (e.status === 400 || e.status === 403) throw e  // 인증 오류만 즉시 중단
-        // 429(RPM) 포함 모든 다른 오류는 다음 모델로 — 각 모델은 별도 RPM 한도
+        if (e.status === 400 || e.status === 403) throw e
+        if (e.status === 429) e429 = true
+      }
+    }
+
+    // 모든 모델이 429면 10초 대기 후 첫 모델 한 번 더 시도
+    if (text === null && modelErrors.every(m => m.includes('quota') || m.includes('429'))) {
+      console.log('All models rate-limited, waiting 10s before final retry...')
+      await sleep(10000)
+      try {
+        text = await callGemini(models[0])
+        modelErrors.length = 0
+      } catch (e) {
+        console.error('Final retry failed:', e.message)
       }
     }
 
