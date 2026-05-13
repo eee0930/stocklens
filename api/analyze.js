@@ -70,7 +70,8 @@ export default async function handler(req, res) {
         const msg = e.name === 'AbortError' ? '15s timeout' : e.message
         modelErrors.push(`[${models[i]}] ${msg}`)
         console.error(`Gemini error (${models[i]}):`, msg)
-        if (e.status === 400 || e.status === 403) throw e // 인증/요청 오류는 재시도 불필요
+        if (e.status === 400 || e.status === 403) throw e  // 인증 오류: 즉시 중단
+        if (e.status === 429) break                         // 분당 한도 초과: 다른 모델도 같으므로 즉시 규칙기반으로
       }
     }
 
