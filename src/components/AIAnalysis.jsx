@@ -28,6 +28,7 @@ function ScoreRing({ score }) {
 
 export default function AIAnalysis({ analysis }) {
   if (!analysis) return null
+  if (analysis?.geminiError) console.error('[Gemini]', analysis.geminiError)
 
   const { score = 50, recommendation = '중립', outlook, longTermOutlook, reasons = [], risks = [] } = analysis
   const recClass = getRecommendationClass(recommendation)
@@ -40,18 +41,12 @@ export default function AIAnalysis({ analysis }) {
         <span
           className="analysis-ai-badge"
           style={analysis?.isRuleBased ? { background: 'rgba(251,191,36,0.1)', color: '#fbbf24', borderColor: 'rgba(251,191,36,0.2)' } : {}}
-          title={analysis?.geminiError || undefined}
         >
           <svg width="8" height="8" viewBox="0 0 8 8">
             <circle cx="4" cy="4" r="4" fill="currentColor"/>
           </svg>
           {analysis?.isRuleBased ? '규칙 기반' : 'Gemini'}
         </span>
-        {analysis?.geminiError && (
-          <span style={{ fontSize: 10, color: '#f87171', marginLeft: 6 }}>
-            ⚠ {analysis.geminiError.slice(0, 80)}
-          </span>
-        )}
       </div>
 
       {/* Score + Recommendation */}

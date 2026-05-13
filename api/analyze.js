@@ -75,13 +75,7 @@ export default async function handler(req, res) {
       }
     }
 
-    if (text === null) {
-      const isQuota = modelErrors.some(e => e.includes('quota') || e.includes('429'))
-      throw new Error(isQuota
-        ? 'Gemini 무료 할당량 초과 — 잠시 후 다시 시도하거나 Google AI Studio에서 결제를 활성화하세요.'
-        : modelErrors.join(' | ')
-      )
-    }
+    if (text === null) throw new Error(modelErrors.join(' | '))
 
     let analysis
     try {
