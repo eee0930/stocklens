@@ -2,7 +2,7 @@ import { useState } from 'react'
 import SearchPage from './components/SearchPage'
 import ResultsPage from './components/ResultsPage'
 import LoadingState from './components/LoadingState'
-import { searchSymbol, fetchAllStockData } from './services/stockApi'
+import { searchSymbol, fetchAllStockData, getCachedAnalysis, setCachedAnalysis } from './services/stockApi'
 import { processStockData } from './utils/calculations'
 
 const STEPS = [
@@ -42,21 +42,25 @@ export default function App() {
       processed.symbol      = symbol
       processed.companyName = processed.companyName || matches[0].shortname || matches[0].longname || symbol
 
-      // 4. Gemini AI 분석 (차트 배열은 AI가 필요 없으므로 제외)
+      // 4. Gemini AI 분석 (캐시 우선, 규칙기반이면 재시도)
       setStep(3)
-      const { chartData: _c, volumeData: _v, sma20Data: _s, ...aiPayload } = processed
-      const aiRes = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(aiPayload),
-      })
+      let aiAnalysis = getCachedAnalysis(symbol)
+      if (!aiAnalysis) {
+        const { chartData: _c, volumeData: _v, sma20Data: _s, ...aiPayload } = processed
+        const aiRes = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(aiPayload),
+        })
 
-      if (!aiRes.ok) {
-        const err = await aiRes.json().catch(() => ({}))
-        throw new Error(err.error || 'AI 분석에 실패했습니다. .env의 GEMINI_API_KEY를 확인하세요.')
+        if (!aiRes.ok) {
+          const err = await aiRes.json().catch(() => ({}))
+          throw new Error(err.error || 'AI 분석에 실패했습니다. .env의 GEMINI_API_KEY를 확인하세요.')
+        }
+
+        aiAnalysis = await aiRes.json()
+        setCachedAnalysis(symbol, aiAnalysis)
       }
-
-      const aiAnalysis = await aiRes.json()
 
       setStockData(processed)
       setAnalysis(aiAnalysis)

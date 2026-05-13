@@ -4,7 +4,8 @@
 import { isKorean, searchKoreanStocks } from '../utils/koreanStocks'
 
 // ── 캐시 ────────────────────────────────────────────────────────────
-const stockCache = new Map() // symbol → { data, dateKey }
+const stockCache    = new Map() // symbol → { data, dateKey }
+const analysisCache = new Map() // symbol → { analysis, dateKey }
 
 function getTodayKey() {
   const d = new Date()
@@ -49,6 +50,20 @@ function getCached(symbol) {
 
 function setCached(symbol, data) {
   stockCache.set(symbol.toUpperCase(), { data, dateKey: getTodayKey() })
+}
+
+// 규칙기반이거나 날짜가 다르면 null → 재분석 트리거
+export function getCachedAnalysis(symbol) {
+  const entry = analysisCache.get(symbol.toUpperCase())
+  if (!entry) return null
+  if (isMarketOpen(symbol)) return null           // 장 중: 항상 재분석
+  if (entry.dateKey !== getTodayKey()) return null // 날짜 바뀜: 무효
+  if (entry.analysis?.isRuleBased) return null    // 규칙기반: 재시도
+  return entry.analysis
+}
+
+export function setCachedAnalysis(symbol, analysis) {
+  analysisCache.set(symbol.toUpperCase(), { analysis, dateKey: getTodayKey() })
 }
 // ────────────────────────────────────────────────────────────────────
 
