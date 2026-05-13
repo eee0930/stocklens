@@ -72,12 +72,13 @@ function buildPrompt(d) {
 - 베타: ${d.beta || 'N/A'}
 - 시가총액: ${d.marketCapFormatted || 'N/A'}
 
-위 데이터만을 근거로 단기 투자 의견을 제시하세요. 반드시 아래 JSON 형식으로만 응답하세요 (다른 텍스트 없이):
+위 데이터를 근거로 단기·장기 투자 의견을 모두 제시하세요. 반드시 아래 JSON 형식으로만 응답하세요 (다른 텍스트 없이):
 
 {
   "score": <0~100 정수>,
   "recommendation": "<강력매수|매수|중립|매도|강력매도 중 하나>",
-  "outlook": "<단기 전망 2~3문장, 한국어>",
+  "outlook": "<단기(1~4주) 전망 2~3문장, 한국어>",
+  "longTermOutlook": "<장기(6개월~2년) 투자 가치와 매수 타이밍 조언 2~3문장. 예: 지금 바로 사도 좋은지, 조금 더 조정을 기다릴지, 분할 매수를 권하는지, 하락장이 길지 않을 것 같으니 장기 보유 목적이면 아무때나 사도 좋다 등 실용적인 조언. 한국어>",
   "reasons": ["<근거1>", "<근거2>", "<근거3>"],
   "risks": ["<리스크1>", "<리스크2>"]
 }`
@@ -136,7 +137,27 @@ function ruleBasedAnalysis(d) {
   else if (score >= 33) recommendation = '매도'
   else                  recommendation = '강력매도'
 
-  const outlook = `${d.companyName}(${d.symbol})의 기술적 지표를 종합하면 단기 ${recommendation} 의견입니다. RSI·MACD·이동평균 등 정량 지표 기반 규칙 분석 결과이며, Gemini AI 키 설정 후 더 정밀한 분석이 제공됩니다.`
+  const outlook = `${d.companyName}(${d.symbol})의 기술적 지표를 종합하면 단기 ${recommendation} 의견입니다. RSI·MACD·이동평균 등 정량 지표 기반 규칙 분석 결과입니다.`
 
-  return { score, recommendation, outlook, reasons: reasons.slice(0, 3), risks: risks.slice(0, 2) }
+  // 장기 전망 규칙 기반 생성
+  let longTermOutlook
+  const eg = d.earningsGrowth != null ? parseFloat(d.earningsGrowth) : null
+  const fromLow = d.priceVs52Low != null ? d.priceVs52Low : null
+  const fromHigh = d.priceVs52High != null ? d.priceVs52High : null
+
+  if (eg != null && eg > 15 && fromHigh != null && fromHigh > -10) {
+    longTermOutlook = `실적 성장세(+${eg}%)가 탄탄하지만 현재 52주 고점 근처에 위치해 있습니다. 장기 투자 가치는 충분하나, 단기 조정 가능성을 고려해 분할 매수 전략을 추천합니다.`
+  } else if (eg != null && eg > 15 && fromLow != null && fromLow < 20) {
+    longTermOutlook = `실적 성장성이 높고 52주 저점 근처의 저렴한 가격대입니다. 장기 보유 목적이라면 지금도 좋은 진입 시점으로 볼 수 있으며, 하락장은 오래 지속되지 않는 경향이 있어 분할 매수를 고려해보세요.`
+  } else if (fromLow != null && fromLow < 15) {
+    longTermOutlook = `52주 저점에 가까운 구간으로 장기 투자자에게 매력적인 가격대입니다. 단기 변동성은 있을 수 있지만, 장기 보유 목적이라면 현 수준에서 분할 매수를 고려해볼 만합니다.`
+  } else if (fromHigh != null && fromHigh < -30) {
+    longTermOutlook = `고점 대비 큰 폭으로 하락한 상태입니다. 추가 하락 가능성도 있으나, 장기 관점에서는 이미 충분한 조정이 이뤄졌을 수 있습니다. 분할 매수로 평균 단가를 낮춰가는 전략이 유효합니다.`
+  } else if (score >= 65) {
+    longTermOutlook = `전반적인 지표가 양호합니다. 장기 투자 관점에서도 긍정적이며, 단기 과열 시 소폭 조정을 기다린 후 진입하거나 지금 일부 매수 후 추가 하락 시 분할 매수하는 전략을 추천합니다.`
+  } else {
+    longTermOutlook = `현재 뚜렷한 방향성이 없는 구간입니다. 장기 투자 목적이라면 하락장은 오래 지속되지 않으므로 지금부터 소액씩 분할 매수를 시작하거나, 명확한 추세 전환 신호 후 진입하는 방법 모두 유효합니다.`
+  }
+
+  return { score, recommendation, outlook, longTermOutlook, reasons: reasons.slice(0, 3), risks: risks.slice(0, 2) }
 }

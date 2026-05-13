@@ -29,7 +29,7 @@ function ScoreRing({ score }) {
 export default function AIAnalysis({ analysis }) {
   if (!analysis) return null
 
-  const { score = 50, recommendation = '중립', outlook, reasons = [], risks = [] } = analysis
+  const { score = 50, recommendation = '중립', outlook, longTermOutlook, reasons = [], risks = [] } = analysis
   const recClass = getRecommendationClass(recommendation)
 
   return (
@@ -63,11 +63,23 @@ export default function AIAnalysis({ analysis }) {
 
       {/* Body */}
       <div className="analysis-body">
-        {/* Outlook */}
+        {/* Short-term Outlook */}
         {outlook && (
           <div>
             <div className="analysis-section-title">단기 전망</div>
             <div className="analysis-outlook">{outlook}</div>
+          </div>
+        )}
+
+        {/* Long-term Outlook */}
+        {longTermOutlook && (
+          <div style={{ marginTop: 14 }}>
+            <div className="analysis-section-title" style={{ color: '#34d399' }}>
+              장기 전망
+            </div>
+            <div className="analysis-outlook" style={{ borderLeft: '2px solid rgba(52,211,153,0.4)', paddingLeft: 10 }}>
+              {longTermOutlook}
+            </div>
           </div>
         )}
 
