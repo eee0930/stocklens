@@ -52,18 +52,23 @@ function setCached(symbol, data) {
   stockCache.set(symbol.toUpperCase(), { data, dateKey: getTodayKey() })
 }
 
-// 규칙기반이거나 날짜가 다르면 null → 재분석 트리거
+const RETRY_INTERVAL = 2 * 60 * 1000 // 규칙기반 재시도 최소 간격: 2분
+
+// 규칙기반 결과도 2분간은 캐시 반환 (할당량 낭비 방지)
 export function getCachedAnalysis(symbol) {
   const entry = analysisCache.get(symbol.toUpperCase())
   if (!entry) return null
   if (isMarketOpen(symbol)) return null           // 장 중: 항상 재분석
   if (entry.dateKey !== getTodayKey()) return null // 날짜 바뀜: 무효
-  if (entry.analysis?.isRuleBased) return null    // 규칙기반: 재시도
+  if (entry.analysis?.isRuleBased) {
+    if (Date.now() - entry.lastAttempt < RETRY_INTERVAL) return entry.analysis // 2분 내: 규칙기반 그대로
+    return null // 2분 지남: Gemini 재시도
+  }
   return entry.analysis
 }
 
 export function setCachedAnalysis(symbol, analysis) {
-  analysisCache.set(symbol.toUpperCase(), { analysis, dateKey: getTodayKey() })
+  analysisCache.set(symbol.toUpperCase(), { analysis, dateKey: getTodayKey(), lastAttempt: Date.now() })
 }
 // ────────────────────────────────────────────────────────────────────
 
