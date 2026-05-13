@@ -11,26 +11,27 @@ export default async function handler(req, res) {
     const genAI = new GoogleGenerativeAI(apiKey)
 
     const sleep = (ms) => new Promise(r => setTimeout(r, ms))
-    // gemini-1.5-flash: 가장 안정적인 무료 모델 (15 RPM)
-    // gemini-2.0-flash: 별도 쿼터 풀, 1.5-flash 실패 시 백업
     const models = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite']
     let result
+    const modelErrors = []
     for (let i = 0; i < models.length; i++) {
-      if (i > 0) await sleep(2000) // 재시도 전 2초 대기 (분당 한도 회피)
+      if (i > 0) await sleep(2000)
       try {
         const model = genAI.getGenerativeModel({ model: models[i] })
         result = await model.generateContent(buildPrompt(d))
         break
       } catch (e) {
+        modelErrors.push(`[${models[i]}] ${e.message}`)
+        console.error(`Gemini model error (${models[i]}):`, e.message)
         const isAuthError = e.message?.includes('API_KEY') ||
                             e.message?.includes('403') ||
-                            e.message?.includes('permission')
+                            e.message?.includes('permission') ||
+                            e.message?.includes('API key')
         if (isAuthError) throw e
-        // 그 외(쿼터, 503, rate limit 등)는 다음 모델로
       }
     }
 
-    if (!result) throw new Error('사용 가능한 Gemini 모델이 없습니다.')
+    if (!result) throw new Error(modelErrors.join(' | '))
 
     const text = result.response.text()
     let analysis
