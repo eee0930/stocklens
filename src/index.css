@@ -368,6 +368,7 @@ html, body {
 ═══════════════════════════════════════════════════ */
 @media (max-width: 900px) {
   .two-col { grid-template-columns: 1fr; }
+  .two-col > div:last-child { order: -1; }
   .analysis-card { position: static; }
 }
 
