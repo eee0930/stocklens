@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     if (!apiKey) throw new Error('GEMINI_API_KEY 환경 변수가 설정되지 않았습니다.')
 
     const sleep = (ms) => new Promise(r => setTimeout(r, ms))
-    const models = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash-latest']
+    const models = ['gemini-2.0-flash-lite', 'gemini-2.0-flash', 'gemini-2.5-flash']
 
     async function callGemini(modelName) {
       const controller = new AbortController()
