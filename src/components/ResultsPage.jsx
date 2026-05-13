@@ -69,16 +69,18 @@ export default function ResultsPage({ stockData, analysis, onBack, onSearch }) {
 
       {/* Mobile search bar */}
       <div className="mobile-search-bar">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--text-muted)', flexShrink: 0 }}>
-          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-        </svg>
-        <input
-          style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontSize: 14, color: 'var(--text-primary)', fontFamily: 'inherit' }}
-          placeholder="새 종목 검색..."
-          value={searchVal}
-          onChange={(e) => setSearchVal(e.target.value)}
-          onKeyDown={handleTopSearch}
-        />
+        <div className="search-input-wrapper">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--text-muted)', flexShrink: 0 }}>
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input
+            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontSize: 16, color: 'var(--text-primary)', fontFamily: 'inherit' }}
+            placeholder="새 종목 검색..."
+            value={searchVal}
+            onChange={(e) => setSearchVal(e.target.value)}
+            onKeyDown={handleTopSearch}
+          />
+        </div>
       </div>
 
       <div className="results-content">
