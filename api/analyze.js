@@ -11,19 +11,18 @@ export default async function handler(req, res) {
     const genAI = new GoogleGenerativeAI(apiKey)
 
     let result
-    for (const modelName of ['gemini-2.5-flash', 'gemini-2.0-flash-lite', 'gemini-1.5-flash']) {
+    for (const modelName of ['gemini-2.0-flash-lite', 'gemini-1.5-flash', 'gemini-2.5-flash']) {
       try {
         const model = genAI.getGenerativeModel({ model: modelName })
         result = await model.generateContent(buildPrompt(d))
         break
       } catch (e) {
-        const retryable = e.message?.includes('quota') ||
-                          e.message?.includes('not found') ||
-                          e.message?.includes('503') ||
-                          e.message?.includes('unavailable') ||
-                          e.message?.includes('overloaded') ||
-                          e.message?.includes('high demand')
-        if (!retryable) throw e
+        // 인증 오류는 다른 모델 시도해도 의미 없으므로 즉시 throw
+        const isAuthError = e.message?.includes('API_KEY') ||
+                            e.message?.includes('403') ||
+                            e.message?.includes('permission')
+        if (isAuthError) throw e
+        // 그 외 모든 오류(쿼터, 503, rate limit 등)는 다음 모델로
       }
     }
 
