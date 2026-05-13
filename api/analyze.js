@@ -6,34 +6,54 @@ export default async function handler(req, res) {
   const d = req.body
 
   try {
-    const { GoogleGenerativeAI } = await import('@google/generative-ai')
     const apiKey = process.env.GEMINI_API_KEY
-    const genAI = new GoogleGenerativeAI(apiKey)
+    if (!apiKey) throw new Error('GEMINI_API_KEY 환경 변수가 설정되지 않았습니다.')
 
     const sleep = (ms) => new Promise(r => setTimeout(r, ms))
-    const models = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite']
-    let result
-    const modelErrors = []
-    for (let i = 0; i < models.length; i++) {
-      if (i > 0) await sleep(2000)
+    const models = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash-latest']
+
+    async function callGemini(modelName) {
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), 15000)
       try {
-        const model = genAI.getGenerativeModel({ model: models[i] })
-        result = await model.generateContent(buildPrompt(d))
-        break
-      } catch (e) {
-        modelErrors.push(`[${models[i]}] ${e.message}`)
-        console.error(`Gemini model error (${models[i]}):`, e.message)
-        const isAuthError = e.message?.includes('API_KEY') ||
-                            e.message?.includes('403') ||
-                            e.message?.includes('permission') ||
-                            e.message?.includes('API key')
-        if (isAuthError) throw e
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: buildPrompt(d) }] }] }),
+            signal: controller.signal,
+          }
+        )
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}))
+          const msg = body?.error?.message || `HTTP ${res.status}`
+          throw Object.assign(new Error(msg), { status: res.status })
+        }
+        const data = await res.json()
+        return data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+      } finally {
+        clearTimeout(timer)
       }
     }
 
-    if (!result) throw new Error(modelErrors.join(' | '))
+    let text = null
+    const modelErrors = []
+    for (let i = 0; i < models.length; i++) {
+      if (i > 0) await sleep(1500)
+      try {
+        text = await callGemini(models[i])
+        break
+      } catch (e) {
+        const msg = e.name === 'AbortError' ? '15s timeout' : e.message
+        modelErrors.push(`[${models[i]}] ${msg}`)
+        console.error(`Gemini error (${models[i]}):`, msg)
+        if (e.status === 400 || e.status === 403) throw e // 인증/요청 오류는 재시도 불필요
+      }
+    }
 
-    const text = result.response.text()
+    if (text === null) throw new Error(modelErrors.join(' | '))
+
     let analysis
     try {
       const m = text.match(/\{[\s\S]*\}/)
