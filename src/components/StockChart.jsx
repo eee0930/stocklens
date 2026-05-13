@@ -98,7 +98,7 @@ export default function StockChart({ chartData, volumeData, sma20Data, symbol })
   const applyRange = (r) => {
     setRange(r)
     if (!chartRef.current || !chartData?.length) return
-    const days = { '1M': 21, '3M': 63, '6M': 126, 'ALL': chartData.length }
+    const days = { '1M': 21, '3M': 63, '6M': 126, '1Y': 252, '5Y': 1260, 'ALL': chartData.length }
     const n = days[r] ?? chartData.length
     const slice = chartData.slice(-n)
     if (slice.length) {
@@ -111,7 +111,7 @@ export default function StockChart({ chartData, volumeData, sma20Data, symbol })
       <div className="card-header" style={{ padding: '12px 20px' }}>
         <span className="card-title">차트</span>
         <div className="chart-tabs">
-          {['1M', '3M', '6M', 'ALL'].map((r) => (
+          {['1M', '3M', '6M', '1Y', '5Y', 'ALL'].map((r) => (
             <button
               key={r}
               className={`chart-tab${range === r ? ' active' : ''}`}

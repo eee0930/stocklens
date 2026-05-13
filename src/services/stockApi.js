@@ -3,6 +3,55 @@
 
 import { isKorean, searchKoreanStocks } from '../utils/koreanStocks'
 
+// ── 캐시 ────────────────────────────────────────────────────────────
+const stockCache = new Map() // symbol → { data, dateKey }
+
+function getTodayKey() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+function getTimeInZone(timeZone) {
+  const str = new Date().toLocaleString('en-US', { timeZone, hour12: false })
+  const [datePart, timePart] = str.split(', ')
+  const [month, day, year] = datePart.split('/').map(Number)
+  const [hours, minutes] = timePart.split(':').map(Number)
+  const dow = new Date(year, month - 1, day).getDay() // 0=일, 6=토
+  return { dow, total: hours * 60 + minutes }
+}
+
+function isUSMarketOpen() {
+  const { dow, total } = getTimeInZone('America/New_York')
+  if (dow === 0 || dow === 6) return false
+  return total >= 9 * 60 + 30 && total < 16 * 60
+}
+
+function isKRMarketOpen() {
+  const { dow, total } = getTimeInZone('Asia/Seoul')
+  if (dow === 0 || dow === 6) return false
+  return total >= 9 * 60 && total < 15 * 60 + 30
+}
+
+function isMarketOpen(symbol) {
+  const upper = symbol.toUpperCase()
+  return (upper.endsWith('.KS') || upper.endsWith('.KQ'))
+    ? isKRMarketOpen()
+    : isUSMarketOpen()
+}
+
+function getCached(symbol) {
+  const entry = stockCache.get(symbol.toUpperCase())
+  if (!entry) return null
+  if (isMarketOpen(symbol)) return null          // 장 중: 항상 새로 요청
+  if (entry.dateKey !== getTodayKey()) return null // 날짜 바뀜: 무효
+  return entry.data
+}
+
+function setCached(symbol, data) {
+  stockCache.set(symbol.toUpperCase(), { data, dateKey: getTodayKey() })
+}
+// ────────────────────────────────────────────────────────────────────
+
 async function apiFetch(path) {
   const res = await fetch(`/api/stock${path}`)
   if (!res.ok) {
@@ -47,11 +96,16 @@ export async function getQuoteSummary(symbol) {
   }
 }
 
-// 차트 + 펀더멘털 병렬 요청
+// 차트 + 펀더멘털 병렬 요청 (캐시 적용)
 export async function fetchAllStockData(symbol) {
+  const cached = getCached(symbol)
+  if (cached) return cached
+
   const [chart, summary] = await Promise.all([
     getChart(symbol),
     getQuoteSummary(symbol),
   ])
-  return { chart, summary }
+  const result = { chart, summary }
+  setCached(symbol, result)
+  return result
 }

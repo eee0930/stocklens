@@ -25,9 +25,9 @@ function stockDataPlugin() {
 
           } else if (path.startsWith('/chart')) {
             const symbol = new URL(`http://x${path}`).searchParams.get('symbol')
-            const twoYrsAgo = new Date(Date.now() - 2 * 365 * 24 * 60 * 60 * 1000)
+            const fiveYrsAgo = new Date(Date.now() - 5 * 365 * 24 * 60 * 60 * 1000)
             const history = await yf.historical(symbol, {
-              period1: twoYrsAgo,
+              period1: fiveYrsAgo,
               period2: new Date(),
               interval: '1d',
             }, { validateResult: false })
