@@ -91,6 +91,7 @@ html, body {
 }
 
 .search-box { width: 100%; max-width: 600px; }
+.feature-cards { display: flex; }
 
 .search-input-wrapper {
   display: flex; align-items: center;
@@ -396,6 +397,8 @@ html, body {
    RESPONSIVE — Mobile  ≤ 768px
 ═══════════════════════════════════════════════════ */
 @media (max-width: 768px) {
+  .feature-cards { display: none; }
+
   /* TopBar */
   .results-topbar { padding: 10px 16px; }
   .topbar-search  { display: none; }
@@ -440,8 +443,6 @@ html, body {
   .search-logo-text   { font-size: 28px; }
   .search-logo-sub    { display: none; }
   .search-btn         { padding: 10px 16px; font-size: 13px; }
-  .search-page > div:last-child { display: none; } /* feature cards 숨김 */
-
   /* TopBar */
   .topbar-logo span   { display: none; } /* 아이콘만 표시 */
 

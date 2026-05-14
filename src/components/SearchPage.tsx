@@ -10,13 +10,20 @@ interface SearchPageProps {
 export default function SearchPage({ onSearch }: SearchPageProps) {
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const submit = async (q: string) => {
     const trimmed = q.trim()
     if (!trimmed) return
     setLoading(true)
-    await onSearch(trimmed)
-    setLoading(false)
+    setError(null)
+    try {
+      await onSearch(trimmed)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err))
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -63,6 +70,12 @@ export default function SearchPage({ onSearch }: SearchPageProps) {
           </button>
         </div>
 
+        {error && (
+          <div style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 8, fontSize: 13, color: '#f87171', whiteSpace: 'pre-line', lineHeight: 1.6 }}>
+            {error}
+          </div>
+        )}
+
         <div className="search-hint">
           <span className="hint-label">🇺🇸</span>
           {US_EXAMPLES.map((ex) => (
@@ -82,7 +95,7 @@ export default function SearchPage({ onSearch }: SearchPageProps) {
       </div>
 
       {/* Feature description */}
-      <div style={{ marginTop: 48, display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 560 }} className="fade-in-delay-2">
+      <div style={{ marginTop: 48, gap: 16, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 560 }} className="fade-in-delay-2 feature-cards">
         {[
           { icon: '📈', label: '기술적 지표', desc: 'RSI · MACD · SMA' },
           { icon: '🏦', label: '펀더멘털', desc: '실적 · 밸류에이션' },

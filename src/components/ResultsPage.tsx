@@ -2,6 +2,7 @@ import { useState } from 'react'
 import StockChart from './StockChart'
 import MetricsGrid from './MetricsGrid'
 import AIAnalysis from './AIAnalysis'
+import ETFHoldings from './ETFHoldings'
 import { formatMarketCap } from '../utils/calculations'
 import type { StockData, Analysis } from '../types'
 
@@ -37,7 +38,7 @@ export default function ResultsPage({ stockData, analysis, onBack, onSearch }: R
     peRatio, pegRatio, eps, dividendYield, analystTarget,
     marketCapFormatted, beta,
     earningsGrowth, revenueGrowth, operatingMargin, profitMargin,
-    chartData, volumeData, sma20Data
+    chartData, volumeData, sma20Data, etfHoldings
   } = stockData
 
   const priceColor = dailyChange >= 0 ? 'up' : 'down'
@@ -134,6 +135,9 @@ export default function ResultsPage({ stockData, analysis, onBack, onSearch }: R
                 symbol={symbol}
               />
             </div>
+
+            {/* ETF Holdings */}
+            {etfHoldings.length > 0 && <ETFHoldings holdings={etfHoldings} onSearch={onSearch} />}
 
             {/* Fundamentals */}
             <div className="card fade-in-delay-2">

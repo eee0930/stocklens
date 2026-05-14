@@ -12,6 +12,12 @@ export interface ChartPoint { time: string; open: number; high: number; low: num
 export interface VolumePoint { time: string; value: number; color: string }
 export interface SMA20Point  { time: string; value: number }
 
+export interface EtfHolding {
+  symbol: string
+  name: string
+  weight: number
+}
+
 export interface StockData {
   companyName: string
   symbol: string
@@ -53,6 +59,7 @@ export interface StockData {
   profitMargin: string | null
   roe: number | null
   roa: number | null
+  etfHoldings: EtfHolding[]
 }
 
 export interface Analysis {

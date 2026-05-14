@@ -82,6 +82,15 @@ export default function StockChart({ chartData, volumeData, sma20Data, symbol: _
 
     chart.timeScale().fitContent()
 
+    // Apply default 1M range
+    const initialSlice = chartData.slice(-21)
+    if (initialSlice.length) {
+      chart.timeScale().setVisibleRange({
+        from: initialSlice[0].time as unknown as import('lightweight-charts').Time,
+        to: initialSlice[initialSlice.length - 1].time as unknown as import('lightweight-charts').Time
+      })
+    }
+
     // Resize handler
     const ro = new ResizeObserver(() => {
       if (!container) return

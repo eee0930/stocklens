@@ -1,5 +1,5 @@
 import { RSI, MACD, SMA } from 'technicalindicators'
-import type { HistoryItem, StockData, ChartPoint, VolumePoint, SMA20Point } from '../types'
+import type { HistoryItem, StockData, ChartPoint, VolumePoint, SMA20Point, EtfHolding } from '../types'
 
 // yahoo-finance2 historical() 반환값:
 //   [{ date: Date, open, high, low, close, volume, adjClose }, ...]  시간순
@@ -149,6 +149,16 @@ export function processStockData(
     profitMargin:    pct(raw2(fd, 'profitMargins')),
     roe:             raw2(fd, 'returnOnEquity'),
     roa:             raw2(fd, 'returnOnAssets'),
+
+    etfHoldings: (() => {
+      const th = (summary?.topHoldings as Record<string, unknown>) || {}
+      const raw = (th.holdings as Array<Record<string, unknown>>) || []
+      return raw.slice(0, 10).map((h): EtfHolding => ({
+        symbol: String(h.symbol || ''),
+        name:   String(h.holdingName || h.symbol || ''),
+        weight: typeof h.holdingPercent === 'number' ? h.holdingPercent : 0,
+      })).filter(h => h.name)
+    })(),
   }
 }
 

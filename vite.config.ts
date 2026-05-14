@@ -38,7 +38,7 @@ function stockDataPlugin(): Plugin {
           } else if (path && path.startsWith('/summary')) {
             const symbol = new URL(`http://x${path}`).searchParams.get('symbol')
             const summary = await (yf as unknown as { quoteSummary: (symbol: string | null, opts: Record<string, unknown>, extra: Record<string, unknown>) => Promise<unknown> }).quoteSummary(symbol, {
-              modules: ['financialData', 'defaultKeyStatistics', 'assetProfile', 'summaryDetail'],
+              modules: ['financialData', 'defaultKeyStatistics', 'assetProfile', 'summaryDetail', 'topHoldings'],
             }, { validateResult: false })
             send(200, summary)
 
