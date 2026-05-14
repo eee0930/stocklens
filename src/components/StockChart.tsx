@@ -1,10 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import { createChart, ColorType, CrosshairMode } from 'lightweight-charts'
+import type { ChartPoint, VolumePoint, SMA20Point } from '../types'
 
-export default function StockChart({ chartData, volumeData, sma20Data, symbol }) {
-  const mainRef   = useRef(null)
-  const chartRef  = useRef(null)
-  const [range, setRange] = useState('3M')
+interface StockChartProps {
+  chartData: ChartPoint[]
+  volumeData: VolumePoint[]
+  sma20Data: SMA20Point[]
+  symbol: string
+}
+
+export default function StockChart({ chartData, volumeData, sma20Data, symbol: _symbol }: StockChartProps) {
+  const mainRef   = useRef<HTMLDivElement>(null)
+  const chartRef  = useRef<ReturnType<typeof createChart> | null>(null)
+  const [range, setRange] = useState('1M')
 
   useEffect(() => {
     if (!mainRef.current || !chartData?.length) return
@@ -40,11 +48,11 @@ export default function StockChart({ chartData, volumeData, sma20Data, symbol })
 
     // Candlestick
     const candleSeries = chart.addCandlestickSeries({
-      upColor:      '#34d399',
-      downColor:    '#f87171',
+      upColor:      '#f87171',
+      downColor:    '#60a5fa',
       borderVisible: false,
-      wickUpColor:   '#34d399',
-      wickDownColor: '#f87171',
+      wickUpColor:   '#f87171',
+      wickDownColor: '#60a5fa',
       priceScaleId: 'right'
     })
 
@@ -53,7 +61,6 @@ export default function StockChart({ chartData, volumeData, sma20Data, symbol })
       priceFormat:    { type: 'volume' },
       priceScaleId:   'volume',
       color:          'rgba(52,211,153,0.4)',
-      scaleMargins:   { top: 0.8, bottom: 0 }
     })
     chart.priceScale('volume').applyOptions({
       scaleMargins: { top: 0.8, bottom: 0 }
@@ -95,14 +102,14 @@ export default function StockChart({ chartData, volumeData, sma20Data, symbol })
   }, [chartData, volumeData, sma20Data])
 
   // Range selector
-  const applyRange = (r) => {
+  const applyRange = (r: string) => {
     setRange(r)
     if (!chartRef.current || !chartData?.length) return
-    const days = { '1M': 21, '3M': 63, '6M': 126, '1Y': 252, '5Y': 1260, 'ALL': chartData.length }
+    const days: Record<string, number> = { '1W': 5, '1M': 21, '3M': 63, '1Y': 252, '5Y': 1260, 'ALL': chartData.length }
     const n = days[r] ?? chartData.length
     const slice = chartData.slice(-n)
     if (slice.length) {
-      chartRef.current.timeScale().setVisibleRange({ from: slice[0].time, to: slice[slice.length - 1].time })
+      chartRef.current.timeScale().setVisibleRange({ from: slice[0].time as unknown as import('lightweight-charts').Time, to: slice[slice.length - 1].time as unknown as import('lightweight-charts').Time })
     }
   }
 
@@ -111,7 +118,7 @@ export default function StockChart({ chartData, volumeData, sma20Data, symbol })
       <div className="card-header" style={{ padding: '12px 20px' }}>
         <span className="card-title">차트</span>
         <div className="chart-tabs">
-          {['1M', '3M', '6M', '1Y', '5Y', 'ALL'].map((r) => (
+          {['1W', '1M', '3M', '1Y', '5Y', 'ALL'].map((r) => (
             <button
               key={r}
               className={`chart-tab${range === r ? ' active' : ''}`}
@@ -129,10 +136,10 @@ export default function StockChart({ chartData, volumeData, sma20Data, symbol })
 
       <div style={{ padding: '8px 20px 12px', display: 'flex', gap: 16 }}>
         <span className="volume-indicator">
-          <span className="volume-dot" style={{ background: '#34d399' }} /> 상승
+          <span className="volume-dot" style={{ background: '#f87171' }} /> 상승
         </span>
         <span className="volume-indicator">
-          <span className="volume-dot" style={{ background: '#f87171' }} /> 하락
+          <span className="volume-dot" style={{ background: '#60a5fa' }} /> 하락
         </span>
         <span className="volume-indicator" style={{ color: '#fbbf24' }}>— SMA 20</span>
       </div>

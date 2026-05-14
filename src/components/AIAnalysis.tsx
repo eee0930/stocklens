@@ -1,6 +1,11 @@
 import { getScoreColor, getRecommendationClass } from '../utils/calculations'
+import type { Analysis } from '../types'
 
-function ScoreRing({ score }) {
+interface ScoreRingProps {
+  score: number
+}
+
+function ScoreRing({ score }: ScoreRingProps) {
   const r        = 34
   const circ     = 2 * Math.PI * r
   const progress = circ - (score / 100) * circ
@@ -26,7 +31,11 @@ function ScoreRing({ score }) {
   )
 }
 
-export default function AIAnalysis({ analysis }) {
+interface AIAnalysisProps {
+  analysis: Analysis
+}
+
+export default function AIAnalysis({ analysis }: AIAnalysisProps) {
   if (!analysis) return null
   if (analysis?.geminiError) console.error('[Gemini]', analysis.geminiError)
 

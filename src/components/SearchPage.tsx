@@ -3,11 +3,15 @@ import { useState } from 'react'
 const US_EXAMPLES = ['NVDA', 'SMH', 'SCHD', 'VOO', 'QQQ']
 const KR_EXAMPLES = ['삼성전자', 'SK하이닉스', '현대차', 'KODEX 미국나스닥100', 'TIGER 미국S&P500']
 
-export default function SearchPage({ onSearch }) {
+interface SearchPageProps {
+  onSearch: (query: string) => Promise<void>
+}
+
+export default function SearchPage({ onSearch }: SearchPageProps) {
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const submit = async (q) => {
+  const submit = async (q: string) => {
     const trimmed = q.trim()
     if (!trimmed) return
     setLoading(true)
@@ -15,7 +19,7 @@ export default function SearchPage({ onSearch }) {
     setLoading(false)
   }
 
-  const handleKey = (e) => {
+  const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') submit(query)
   }
 

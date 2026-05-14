@@ -16,7 +16,11 @@
     "yahoo-finance2": "^3.14.0"
   },
   "devDependencies": {
+    "@types/node": "^25.7.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^6.0.3",
     "vite": "^5.4.19"
   }
 }

@@ -3,8 +3,15 @@ import StockChart from './StockChart'
 import MetricsGrid from './MetricsGrid'
 import AIAnalysis from './AIAnalysis'
 import { formatMarketCap } from '../utils/calculations'
+import type { StockData, Analysis } from '../types'
 
-function FundRow({ label, value, colorClass }) {
+interface FundRowProps {
+  label: string
+  value?: string | number | null
+  colorClass?: string
+}
+
+function FundRow({ label, value, colorClass }: FundRowProps) {
   return (
     <div className="fundamental-row">
       <span className="fundamental-key">{label}</span>
@@ -13,7 +20,14 @@ function FundRow({ label, value, colorClass }) {
   )
 }
 
-export default function ResultsPage({ stockData, analysis, onBack, onSearch }) {
+interface ResultsPageProps {
+  stockData: StockData
+  analysis: Analysis
+  onBack: () => void
+  onSearch: (query: string) => Promise<void>
+}
+
+export default function ResultsPage({ stockData, analysis, onBack, onSearch }: ResultsPageProps) {
   const [searchVal, setSearchVal] = useState('')
 
   const {
@@ -29,7 +43,7 @@ export default function ResultsPage({ stockData, analysis, onBack, onSearch }) {
   const priceColor = dailyChange >= 0 ? 'up' : 'down'
   const priceSign  = dailyChange >= 0 ? '+' : ''
 
-  const handleTopSearch = (e) => {
+  const handleTopSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchVal.trim()) {
       onSearch(searchVal.trim())
       setSearchVal('')
@@ -130,21 +144,21 @@ export default function ResultsPage({ stockData, analysis, onBack, onSearch }) {
                 <div className="fund-cols">
                   <div>
                     <FundRow label="시가총액"  value={marketCapFormatted} />
-                    <FundRow label="P/E 비율"  value={peRatio && peRatio !== 'None' ? parseFloat(peRatio).toFixed(1) : null} />
-                    <FundRow label="PEG 비율"  value={pegRatio && pegRatio !== 'None' ? parseFloat(pegRatio).toFixed(2) : null} />
-                    <FundRow label="EPS"       value={eps && eps !== 'None' ? `$${parseFloat(eps).toFixed(2)}` : null} />
-                    <FundRow label="베타"       value={beta && beta !== 'None' ? parseFloat(beta).toFixed(2) : null} />
-                    <FundRow label="배당수익률" value={dividendYield && dividendYield !== 'None' && parseFloat(dividendYield) > 0 ? `${(parseFloat(dividendYield)*100).toFixed(2)}%` : '없음'} />
+                    <FundRow label="P/E 비율"  value={peRatio != null ? parseFloat(String(peRatio)).toFixed(1) : null} />
+                    <FundRow label="PEG 비율"  value={pegRatio != null ? parseFloat(String(pegRatio)).toFixed(2) : null} />
+                    <FundRow label="EPS"       value={eps != null ? `$${parseFloat(String(eps)).toFixed(2)}` : null} />
+                    <FundRow label="베타"       value={beta != null ? parseFloat(String(beta)).toFixed(2) : null} />
+                    <FundRow label="배당수익률" value={dividendYield != null && parseFloat(String(dividendYield)) > 0 ? `${(parseFloat(String(dividendYield))*100).toFixed(2)}%` : '없음'} />
                   </div>
                   <div>
                     <FundRow
                       label="분기실적성장"
-                      value={earningsGrowth != null ? `${earningsGrowth > 0 ? '+' : ''}${earningsGrowth}%` : null}
+                      value={earningsGrowth != null ? `${parseFloat(earningsGrowth) > 0 ? '+' : ''}${earningsGrowth}%` : null}
                       colorClass={earningsGrowth != null && parseFloat(earningsGrowth) > 0 ? 'up' : earningsGrowth != null ? 'down' : ''}
                     />
                     <FundRow
                       label="분기매출성장"
-                      value={revenueGrowth != null ? `${revenueGrowth > 0 ? '+' : ''}${revenueGrowth}%` : null}
+                      value={revenueGrowth != null ? `${parseFloat(revenueGrowth) > 0 ? '+' : ''}${revenueGrowth}%` : null}
                       colorClass={revenueGrowth != null && parseFloat(revenueGrowth) > 0 ? 'up' : revenueGrowth != null ? 'down' : ''}
                     />
                     <FundRow
@@ -162,7 +176,7 @@ export default function ResultsPage({ stockData, analysis, onBack, onSearch }) {
                   </div>
                 </div>
 
-                {analystTarget && analystTarget !== 'None' && (
+                {analystTarget != null && (
                   <div style={{
                     marginTop: 16,
                     padding: '12px 14px',
@@ -174,7 +188,7 @@ export default function ResultsPage({ stockData, analysis, onBack, onSearch }) {
                   }}>
                     <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>애널리스트 목표주가</span>
                     <span style={{ fontSize: 15, fontWeight: 700, fontFamily: 'monospace', color: 'var(--accent)' }}>
-                      ${parseFloat(analystTarget).toFixed(2)}
+                      ${parseFloat(String(analystTarget)).toFixed(2)}
                     </span>
                   </div>
                 )}
@@ -205,3 +219,6 @@ export default function ResultsPage({ stockData, analysis, onBack, onSearch }) {
     </div>
   )
 }
+
+// Keep formatMarketCap imported but used only if needed externally
+export { formatMarketCap }

@@ -2,17 +2,28 @@
 // API 키 불필요, 횟수 제한 없음
 
 import { isKorean, searchKoreanStocks } from '../utils/koreanStocks'
+import type { SearchResult, Analysis, HistoryItem } from '../types'
 
 // ── 캐시 ────────────────────────────────────────────────────────────
-const stockCache    = new Map() // symbol → { data, dateKey }
-const analysisCache = new Map() // symbol → { analysis, dateKey }
+interface StockCacheEntry {
+  data: { chart: HistoryItem[]; summary: Record<string, unknown> }
+  dateKey: string
+}
 
-function getTodayKey() {
+interface AnalysisCacheEntry {
+  analysis: Analysis
+  dateKey: string
+}
+
+const stockCache    = new Map<string, StockCacheEntry>()    // symbol → { data, dateKey }
+const analysisCache = new Map<string, AnalysisCacheEntry>() // symbol → { analysis, dateKey }
+
+function getTodayKey(): string {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-function getTimeInZone(timeZone) {
+function getTimeInZone(timeZone: string): { dow: number; total: number } {
   const str = new Date().toLocaleString('en-US', { timeZone, hour12: false })
   const [datePart, timePart] = str.split(', ')
   const [month, day, year] = datePart.split('/').map(Number)
@@ -21,26 +32,26 @@ function getTimeInZone(timeZone) {
   return { dow, total: hours * 60 + minutes }
 }
 
-function isUSMarketOpen() {
+function isUSMarketOpen(): boolean {
   const { dow, total } = getTimeInZone('America/New_York')
   if (dow === 0 || dow === 6) return false
   return total >= 9 * 60 + 30 && total < 16 * 60
 }
 
-function isKRMarketOpen() {
+function isKRMarketOpen(): boolean {
   const { dow, total } = getTimeInZone('Asia/Seoul')
   if (dow === 0 || dow === 6) return false
   return total >= 9 * 60 && total < 15 * 60 + 30
 }
 
-function isMarketOpen(symbol) {
+function isMarketOpen(symbol: string): boolean {
   const upper = symbol.toUpperCase()
   return (upper.endsWith('.KS') || upper.endsWith('.KQ'))
     ? isKRMarketOpen()
     : isUSMarketOpen()
 }
 
-function getCached(symbol) {
+function getCached(symbol: string): StockCacheEntry['data'] | null {
   const entry = stockCache.get(symbol.toUpperCase())
   if (!entry) return null
   if (isMarketOpen(symbol)) return null          // 장 중: 항상 새로 요청
@@ -48,12 +59,12 @@ function getCached(symbol) {
   return entry.data
 }
 
-function setCached(symbol, data) {
+function setCached(symbol: string, data: StockCacheEntry['data']): void {
   stockCache.set(symbol.toUpperCase(), { data, dateKey: getTodayKey() })
 }
 
 // Gemini 성공 결과만 캐시 — 규칙기반은 저장 안 함 → 다음 검색에서 항상 재시도
-export function getCachedAnalysis(symbol) {
+export function getCachedAnalysis(symbol: string): Analysis | null {
   const entry = analysisCache.get(symbol.toUpperCase())
   if (!entry) return null
   if (isMarketOpen(symbol)) return null           // 장 중: 항상 재분석
@@ -61,23 +72,23 @@ export function getCachedAnalysis(symbol) {
   return entry.analysis
 }
 
-export function setCachedAnalysis(symbol, analysis) {
+export function setCachedAnalysis(symbol: string, analysis: Analysis): void {
   if (analysis?.isRuleBased) return // 규칙기반은 저장 안 함
   analysisCache.set(symbol.toUpperCase(), { analysis, dateKey: getTodayKey() })
 }
 // ────────────────────────────────────────────────────────────────────
 
-async function apiFetch(path) {
+async function apiFetch(path: string): Promise<unknown> {
   const res = await fetch(`/api/stock${path}`)
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}))
+    const err = await res.json().catch(() => ({})) as { error?: string }
     throw new Error(err.error || `데이터 요청 실패 (${res.status})`)
   }
   return res.json()
 }
 
 // 종목 검색 → [{ symbol, shortname, longname, quoteType, exchange }]
-export async function searchSymbol(query) {
+export async function searchSymbol(query: string): Promise<SearchResult[]> {
   // 한글 입력이면 매핑 테이블 우선 검색
   if (isKorean(query)) {
     const krResults = searchKoreanStocks(query)
@@ -87,32 +98,32 @@ export async function searchSymbol(query) {
 
   // 영문 / 티커 검색 → Yahoo Finance
   const quotes = await apiFetch(`/search?q=${encodeURIComponent(query)}`)
-  return (Array.isArray(quotes) ? quotes : []).filter(q =>
+  return (Array.isArray(quotes) ? quotes as SearchResult[] : []).filter(q =>
     (q.quoteType === 'EQUITY' || q.quoteType === 'ETF') &&
     q.exchange !== 'PNK'
   )
 }
 
 // 최근 6개월 OHLCV 히스토리
-export async function getChart(symbol) {
+export async function getChart(symbol: string): Promise<HistoryItem[]> {
   const history = await apiFetch(`/chart?symbol=${encodeURIComponent(symbol)}`)
   if (!Array.isArray(history) || history.length === 0) {
     throw new Error(`${symbol}의 주가 데이터를 찾을 수 없습니다.`)
   }
-  return history
+  return history as HistoryItem[]
 }
 
 // 펀더멘털 (실패해도 빈 객체 반환)
-export async function getQuoteSummary(symbol) {
+export async function getQuoteSummary(symbol: string): Promise<Record<string, unknown>> {
   try {
-    return await apiFetch(`/summary?symbol=${encodeURIComponent(symbol)}`)
+    return await apiFetch(`/summary?symbol=${encodeURIComponent(symbol)}`) as Record<string, unknown>
   } catch {
     return {}
   }
 }
 
 // 차트 + 펀더멘털 병렬 요청 (캐시 적용)
-export async function fetchAllStockData(symbol) {
+export async function fetchAllStockData(symbol: string): Promise<{ chart: HistoryItem[]; summary: Record<string, unknown> }> {
   const cached = getCached(symbol)
   if (cached) return cached
 

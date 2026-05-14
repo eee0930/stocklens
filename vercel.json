@@ -2,8 +2,8 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "functions": {
-    "api/**/*.js": {
-      "maxDuration": 60
+    "api/**/*.ts": {
+      "maxDuration": 90
     }
   },
   "rewrites": [

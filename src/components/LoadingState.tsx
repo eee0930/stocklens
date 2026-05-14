@@ -1,13 +1,23 @@
-export default function LoadingState({ steps, currentStep }) {
+interface Step {
+  id: string
+  label: string
+}
+
+interface LoadingStateProps {
+  steps: Step[]
+  currentStep: number
+}
+
+export default function LoadingState({ steps, currentStep }: LoadingStateProps) {
   return (
     <div className="loading-page">
       <div className="loading-spinner" />
 
       <div style={{ textAlign: 'center', marginBottom: 8 }}>
-        <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
+        <div style={{ fontSize: 22, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>
           데이터 분석 중
         </div>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>잠시만 기다려주세요</div>
+        <div style={{ fontSize: 15, color: 'var(--text-muted)' }}>잠시만 기다려주세요</div>
       </div>
 
       <div className="loading-steps">

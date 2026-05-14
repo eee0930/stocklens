@@ -1,7 +1,15 @@
 // 한국 주요 상장 종목 매핑 (한글명 → Yahoo Finance 티커)
 // KOSPI: .KS  /  KOSDAQ: .KQ
 
-const KR_MAP = [
+import type { SearchResult } from '../types'
+
+interface KrMapEntry {
+  names: string[]
+  symbol: string
+  shortname: string
+}
+
+const KR_MAP: KrMapEntry[] = [
   // ── 반도체 / IT
   { names: ['삼성전자', '삼성 전자'],             symbol: '005930.KS', shortname: '삼성전자' },
   { names: ['sk하이닉스', 'sk 하이닉스', '하이닉스'], symbol: '000660.KS', shortname: 'SK하이닉스' },
@@ -103,16 +111,16 @@ const KR_MAP = [
 ]
 
 // 한글 포함 여부 판별
-export function isKorean(query) {
+export function isKorean(query: string): boolean {
   return /[가-힣ㄱ-ㆎ]/.test(query)
 }
 
 // 한글 쿼리 → 매핑 결과 반환 (Yahoo Finance search 결과 형식과 동일)
-export function searchKoreanStocks(query) {
+export function searchKoreanStocks(query: string): SearchResult[] {
   const q = query.trim().toLowerCase().replace(/\s+/g, '')
   if (!q) return []
 
-  const results = []
+  const results: SearchResult[] = []
   for (const stock of KR_MAP) {
     const matched = stock.names.some(name => {
       const n = name.toLowerCase().replace(/\s+/g, '')
