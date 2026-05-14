@@ -10,7 +10,7 @@ const handler: Handler = async (req, res) => {
       quoteSummary: (symbol: string, opts: Record<string, unknown>, extra: Record<string, unknown>) => Promise<unknown>
     }
     const summary = await yf.quoteSummary(symbol, {
-      modules: ['financialData', 'defaultKeyStatistics', 'assetProfile', 'summaryDetail', 'topHoldings'],
+      modules: ['financialData', 'defaultKeyStatistics', 'assetProfile', 'summaryDetail', 'topHoldings', 'quoteType'],
     }, { validateResult: false })
     res.status(200).json(summary)
   } catch (err) {

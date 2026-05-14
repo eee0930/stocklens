@@ -99,12 +99,13 @@ export function processStockData(
   const fd = (summary?.financialData        as SummaryRaw) || {}
   const ks = (summary?.defaultKeyStatistics as SummaryRaw) || {}
   const ap = (summary?.assetProfile         as SummaryRaw) || {}
+  const qt = (summary?.quoteType            as SummaryRaw) || {}
 
   const pct = (v: number | null): string | null => v != null ? (v * 100).toFixed(1) : null
   const mktCap = raw2(sd, 'marketCap') || null
 
   return {
-    companyName:  (ap.longName as string) || '',
+    companyName:  (ap.longName as string) || (qt.longName as string) || '',
     symbol:       '',          // 검색 결과에서 채워짐
     sector:       (ap.sector   as string) || '',
     industry:     (ap.industry as string) || '',
