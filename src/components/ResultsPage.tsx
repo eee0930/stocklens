@@ -3,20 +3,23 @@ import StockChart from './StockChart'
 import MetricsGrid from './MetricsGrid'
 import AIAnalysis from './AIAnalysis'
 import ETFHoldings from './ETFHoldings'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { formatMarketCap } from '../utils/calculations'
 import type { StockData, Analysis } from '../types'
 
 interface FundRowProps {
   label: string
   value?: string | number | null
-  colorClass?: string
+  valueClass?: string
 }
 
-function FundRow({ label, value, colorClass }: FundRowProps) {
+function FundRow({ label, value, valueClass }: FundRowProps) {
   return (
-    <div className="fundamental-row">
-      <span className="fundamental-key">{label}</span>
-      <span className={`fundamental-val${colorClass ? ` ${colorClass}` : ''}`}>{value ?? 'N/A'}</span>
+    <div className="flex justify-between items-center py-[9px] border-b border-border last:border-b-0 gap-2">
+      <span className="text-xs text-fg-muted">{label}</span>
+      <span className={['text-[13px] font-semibold font-mono text-right', valueClass ?? 'text-fg'].join(' ')}>
+        {value ?? 'N/A'}
+      </span>
     </div>
   )
 }
@@ -41,8 +44,8 @@ export default function ResultsPage({ stockData, analysis, onBack, onSearch }: R
     chartData, volumeData, sma20Data, etfHoldings
   } = stockData
 
-  const priceColor = dailyChange >= 0 ? 'up' : 'down'
-  const priceSign  = dailyChange >= 0 ? '+' : ''
+  const isUp = dailyChange >= 0
+  const priceSign = isUp ? '+' : ''
 
   const handleTopSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchVal.trim()) {
@@ -52,10 +55,13 @@ export default function ResultsPage({ stockData, analysis, onBack, onSearch }: R
   }
 
   return (
-    <div className="results-page">
+    <div className="min-h-screen bg-bg">
       {/* Top bar */}
-      <div className="results-topbar">
-        <div className="topbar-logo" onClick={onBack}>
+      <div className="flex items-center justify-between px-6 py-3 border-b border-border sticky top-0 bg-bg/90 backdrop-blur-xl z-[100] gap-3">
+        <div
+          className="flex items-center gap-2 text-base font-bold text-fg cursor-pointer shrink-0"
+          onClick={onBack}
+        >
           <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
             <rect width="32" height="32" rx="8" fill="rgba(79,142,247,0.15)"/>
             <path d="M8 16 L14 10 L18 14 L24 8" stroke="#4f8ef7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -64,12 +70,13 @@ export default function ResultsPage({ stockData, analysis, onBack, onSearch }: R
           <span>StockLens</span>
         </div>
 
-        <div className="topbar-search">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--text-muted)', flexShrink: 0 }}>
+        {/* Desktop search */}
+        <div className="hidden md:flex items-center bg-surface-1 border border-border rounded-lg px-3 py-1.5 gap-2 flex-1 max-w-[360px] focus-within:border-accent transition-colors">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-fg-muted shrink-0">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
           <input
-            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontSize: 13, color: 'var(--text-primary)', fontFamily: 'inherit' }}
+            className="flex-1 bg-transparent border-none outline-none text-[13px] text-fg"
             placeholder="새 종목 검색..."
             value={searchVal}
             onChange={(e) => setSearchVal(e.target.value)}
@@ -77,19 +84,22 @@ export default function ResultsPage({ stockData, analysis, onBack, onSearch }: R
           />
         </div>
 
-        <button className="btn-outline" style={{ fontSize: 12, padding: '7px 14px' }} onClick={onBack}>
+        <button
+          className="bg-transparent border border-border-light rounded-xl px-3.5 py-1.5 text-xs font-medium text-fg-secondary cursor-pointer hover:border-accent hover:text-accent transition-all"
+          onClick={onBack}
+        >
           ← 홈
         </button>
       </div>
 
       {/* Mobile search bar */}
-      <div className="mobile-search-bar">
-        <div className="search-input-wrapper">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--text-muted)', flexShrink: 0 }}>
+      <div className="md:hidden px-4 py-2.5 border-b border-border bg-bg">
+        <div className="flex items-center bg-surface-1 border border-border-light rounded-xl py-2.5 px-4 gap-2.5 focus-within:border-accent transition-colors">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-fg-muted shrink-0">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
           <input
-            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontSize: 16, color: 'var(--text-primary)', fontFamily: 'inherit' }}
+            className="flex-1 bg-transparent border-none outline-none text-fg"
             placeholder="새 종목 검색..."
             value={searchVal}
             onChange={(e) => setSearchVal(e.target.value)}
@@ -98,24 +108,32 @@ export default function ResultsPage({ stockData, analysis, onBack, onSearch }: R
         </div>
       </div>
 
-      <div className="results-content">
+      <div className="max-w-[1200px] mx-auto px-6 pt-7 pb-16 max-md:px-4 max-md:pt-5 max-md:pb-16">
         {/* Company header */}
-        <div className="company-header fade-in">
-          <div className="company-badge">
-            <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="var(--green)"/></svg>
+        <div className="mb-7 fade-in">
+          <div className="inline-flex items-center gap-1.5 bg-surface-2 border border-border rounded px-2.5 py-1 text-[11px] text-fg-muted uppercase tracking-wide mb-2.5">
+            <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#34d399"/></svg>
             US Stock
           </div>
-          <div className="company-name">{companyName}</div>
+          <div className="text-3xl font-bold text-fg tracking-tight leading-tight mb-1 max-md:text-[22px]">{companyName}</div>
           <div>
-            <span className="company-ticker">{symbol}</span>
-            {sector && <span className="company-sector">{sector}{industry ? ` · ${industry}` : ''}</span>}
+            <span className="inline-block text-[13px] font-medium font-mono text-accent bg-accent/12 border border-accent/20 rounded px-2 py-0.5 mr-2.5 max-md:text-xs">
+              {symbol}
+            </span>
+            {sector && (
+              <span className="text-[13px] text-fg-muted max-[480px]:hidden">
+                {sector}{industry ? ` · ${industry}` : ''}
+              </span>
+            )}
           </div>
-          <div className="price-row">
-            <span className="price-current mono">${currentPrice?.toFixed(2)}</span>
-            <span className={`price-change ${priceColor}`}>
+          <div className="flex items-baseline gap-3 mt-3.5 flex-wrap">
+            <span className="text-[40px] font-bold font-mono text-fg tracking-tight max-md:text-[32px] max-[480px]:text-[28px]">
+              ${currentPrice?.toFixed(2)}
+            </span>
+            <span className={['text-lg font-semibold font-mono max-md:text-[15px]', isUp ? 'text-red' : 'text-blue'].join(' ')}>
               {priceSign}{dailyChange?.toFixed(2)}%
             </span>
-            <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>당일 변동</span>
+            <span className="text-[13px] text-fg-muted">당일 변동</span>
           </div>
         </div>
 
@@ -123,29 +141,29 @@ export default function ResultsPage({ stockData, analysis, onBack, onSearch }: R
         <MetricsGrid stockData={stockData} />
 
         {/* Main layout */}
-        <div className="two-col">
+        <div className="grid grid-cols-[1fr_380px] gap-6 items-start max-[900px]:grid-cols-1">
           {/* Left column */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div className="flex flex-col gap-6">
             {/* Chart */}
-            <div className="card fade-in-delay">
+            <Card className="fade-in-delay">
               <StockChart
                 chartData={chartData}
                 volumeData={volumeData}
                 sma20Data={sma20Data}
                 symbol={symbol}
               />
-            </div>
+            </Card>
 
             {/* ETF Holdings */}
             {etfHoldings.length > 0 && <ETFHoldings holdings={etfHoldings} onSearch={onSearch} />}
 
             {/* Fundamentals */}
-            <div className="card fade-in-delay-2">
-              <div className="card-header">
-                <span className="card-title">펀더멘털</span>
-              </div>
-              <div className="card-body">
-                <div className="fund-cols">
+            <Card className="fade-in-delay-2">
+              <CardHeader>
+                <CardTitle>펀더멘털</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-x-6 max-md:grid-cols-1">
                   <div>
                     <FundRow label="시가총액"  value={marketCapFormatted} />
                     <FundRow label="P/E 비율"  value={peRatio != null ? parseFloat(String(peRatio)).toFixed(1) : null} />
@@ -158,64 +176,56 @@ export default function ResultsPage({ stockData, analysis, onBack, onSearch }: R
                     <FundRow
                       label="분기실적성장"
                       value={earningsGrowth != null ? `${parseFloat(earningsGrowth) > 0 ? '+' : ''}${earningsGrowth}%` : null}
-                      colorClass={earningsGrowth != null && parseFloat(earningsGrowth) > 0 ? 'up' : earningsGrowth != null ? 'down' : ''}
+                      valueClass={earningsGrowth != null ? (parseFloat(earningsGrowth) > 0 ? 'text-red' : 'text-blue') : ''}
                     />
                     <FundRow
                       label="분기매출성장"
                       value={revenueGrowth != null ? `${parseFloat(revenueGrowth) > 0 ? '+' : ''}${revenueGrowth}%` : null}
-                      colorClass={revenueGrowth != null && parseFloat(revenueGrowth) > 0 ? 'up' : revenueGrowth != null ? 'down' : ''}
+                      valueClass={revenueGrowth != null ? (parseFloat(revenueGrowth) > 0 ? 'text-red' : 'text-blue') : ''}
                     />
                     <FundRow
                       label="영업이익률"
                       value={operatingMargin != null ? `${operatingMargin}%` : null}
-                      colorClass={operatingMargin != null && parseFloat(operatingMargin) > 0 ? 'up' : ''}
+                      valueClass={operatingMargin != null && parseFloat(operatingMargin) > 0 ? 'text-red' : ''}
                     />
                     <FundRow
                       label="순이익률"
                       value={profitMargin != null ? `${profitMargin}%` : null}
-                      colorClass={profitMargin != null && parseFloat(profitMargin) > 0 ? 'up' : ''}
+                      valueClass={profitMargin != null && parseFloat(profitMargin) > 0 ? 'text-red' : ''}
                     />
-                    <FundRow label="52주 고점"  value={high52 ? `$${high52.toFixed(2)}` : null} />
-                    <FundRow label="52주 저점"  value={low52  ? `$${low52.toFixed(2)}`  : null} />
+                    <FundRow label="52주 고점" value={high52 ? `$${high52.toFixed(2)}` : null} />
+                    <FundRow label="52주 저점" value={low52  ? `$${low52.toFixed(2)}`  : null} />
                   </div>
                 </div>
 
                 {analystTarget != null && (
-                  <div style={{
-                    marginTop: 16,
-                    padding: '12px 14px',
-                    background: 'var(--surface-2)',
-                    borderRadius: 8,
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                  }}>
-                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>애널리스트 목표주가</span>
-                    <span style={{ fontSize: 15, fontWeight: 700, fontFamily: 'monospace', color: 'var(--accent)' }}>
+                  <div className="mt-4 px-3.5 py-3 bg-surface-2 rounded-lg flex justify-between items-center">
+                    <span className="text-xs text-fg-muted">애널리스트 목표주가</span>
+                    <span className="text-[15px] font-bold font-mono text-accent">
                       ${parseFloat(String(analystTarget)).toFixed(2)}
                     </span>
                   </div>
                 )}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Description */}
             {description && (
-              <div className="card fade-in-delay-2">
-                <div className="card-header">
-                  <span className="card-title">기업 개요</span>
-                </div>
-                <div className="card-body">
-                  <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+              <Card className="fade-in-delay-2">
+                <CardHeader>
+                  <CardTitle>기업 개요</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-[13px] text-fg-secondary leading-[1.7]">
                     {description.length > 400 ? description.slice(0, 400) + '...' : description}
                   </p>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             )}
           </div>
 
-          {/* Right column — AI Analysis */}
-          <div>
+          {/* Right column — AI Analysis (moves to top on mobile) */}
+          <div className="max-[900px]:order-first">
             <AIAnalysis analysis={analysis} />
           </div>
         </div>
@@ -224,5 +234,4 @@ export default function ResultsPage({ stockData, analysis, onBack, onSearch }: R
   )
 }
 
-// Keep formatMarketCap imported but used only if needed externally
 export { formatMarketCap }

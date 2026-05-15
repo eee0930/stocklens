@@ -5,7 +5,7 @@ interface ErrorPageProps {
 
 export default function ErrorPage({ message, onBack }: ErrorPageProps) {
   return (
-    <div className="error-page">
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center bg-bg">
       <svg width="250" height="165" viewBox="-20 0 250 165" fill="none" xmlns="http://www.w3.org/2000/svg" className="fade-in">
         <ellipse cx="108" cy="152" rx="72" ry="8" fill="rgba(79,142,247,0.06)"/>
         <rect x="60" y="88" width="98" height="58" rx="12" fill="rgba(79,142,247,0.09)" stroke="rgba(79,142,247,0.30)" strokeWidth="1.8"/>
@@ -35,11 +35,18 @@ export default function ErrorPage({ message, onBack }: ErrorPageProps) {
         <text x="168" y="67" fontSize="17" fontWeight="700" fill="rgba(79,142,247,0.34)" fontFamily="monospace">z</text>
         <text x="188" y="44" fontSize="21" fontWeight="700" fill="rgba(79,142,247,0.18)" fontFamily="monospace">z</text>
       </svg>
-      <div className="error-box fade-in-delay">
-        <div className="error-title">오류가 발생했습니다</div>
-        <div className="error-message">{message}</div>
+
+      <div className="bg-red/8 border border-red/20 rounded-2xl py-6 px-8 max-w-[440px] fade-in-delay">
+        <div className="text-base font-semibold text-red mb-2">오류가 발생했습니다</div>
+        <div className="text-[13px] text-fg-secondary leading-relaxed whitespace-pre-line">{message}</div>
       </div>
-      <button className="btn-outline" onClick={onBack}>← 뒤로</button>
+
+      <button
+        className="bg-transparent border border-border-light rounded-xl px-5 py-2.5 text-[13px] font-medium text-fg-secondary cursor-pointer hover:border-accent hover:text-accent transition-all"
+        onClick={onBack}
+      >
+        ← 뒤로
+      </button>
     </div>
   )
 }

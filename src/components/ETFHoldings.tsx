@@ -1,3 +1,4 @@
+import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import type { EtfHolding } from '../types'
 
 interface ETFHoldingsProps {
@@ -11,50 +12,43 @@ export default function ETFHoldings({ holdings, onSearch }: ETFHoldingsProps) {
   const maxWeight = Math.max(...holdings.map(h => h.weight))
 
   return (
-    <div className="card fade-in-delay-2">
-      <div className="card-header">
-        <span className="card-title">ETF 상위 보유 종목</span>
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>TOP {holdings.length}</span>
-      </div>
-      <div className="card-body" style={{ padding: '0 0 4px' }}>
+    <Card className="fade-in-delay-2">
+      <CardHeader>
+        <CardTitle>ETF 상위 보유 종목</CardTitle>
+        <span className="text-[11px] text-fg-muted">TOP {holdings.length}</span>
+      </CardHeader>
+      <div className="pb-1">
         {holdings.map((h, i) => (
-          <div key={i} onClick={() => h.symbol && onSearch(h.symbol)} style={{
-            display: 'flex', alignItems: 'center', gap: 10,
-            padding: '9px 20px',
-            borderBottom: i < holdings.length - 1 ? '1px solid var(--border)' : 'none',
-            cursor: h.symbol ? 'pointer' : 'default',
-          }} onMouseEnter={e => { if (h.symbol) (e.currentTarget as HTMLDivElement).style.background = 'var(--surface-2)' }}
-             onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = '' }}>
-            <span style={{ width: 20, fontSize: 11, color: 'var(--text-muted)', textAlign: 'right', flexShrink: 0 }}>
-              {i + 1}
-            </span>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', wordBreak: 'break-word' }}>
-                  {h.name}
-                </span>
-                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--accent)', flexShrink: 0, marginLeft: 8 }}>
-                  {(h.weight * 100).toFixed(2)}%
-                </span>
+          <div
+            key={i}
+            className={[
+              'flex items-center gap-2.5 px-5 py-[9px] transition-colors',
+              i < holdings.length - 1 ? 'border-b border-border' : '',
+              h.symbol ? 'cursor-pointer hover:bg-surface-2' : '',
+            ].join(' ')}
+            onClick={() => h.symbol && onSearch(h.symbol)}
+          >
+            <span className="w-5 text-[11px] text-fg-muted text-right shrink-0">{i + 1}</span>
+            <div className="flex-1 min-w-0">
+              <div className="flex justify-between items-baseline mb-1">
+                <span className="text-[13px] font-semibold text-fg break-words">{h.name}</span>
+                <span className="text-xs font-bold text-accent shrink-0 ml-2">{(h.weight * 100).toFixed(2)}%</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div className="flex items-center gap-2">
                 {h.symbol && (
-                  <span style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'monospace' }}>{h.symbol}</span>
+                  <span className="text-[10px] text-fg-muted font-mono">{h.symbol}</span>
                 )}
-                <div style={{ flex: 1, height: 3, background: 'var(--surface-2)', borderRadius: 2 }}>
-                  <div style={{
-                    width: `${(h.weight / maxWeight) * 100}%`,
-                    height: '100%',
-                    background: 'var(--accent)',
-                    borderRadius: 2,
-                    opacity: 0.7,
-                  }} />
+                <div className="flex-1 h-[3px] bg-surface-2 rounded-sm">
+                  <div
+                    className="h-full bg-accent rounded-sm opacity-70"
+                    style={{ width: `${(h.weight / maxWeight) * 100}%` }}
+                  />
                 </div>
               </div>
             </div>
           </div>
         ))}
       </div>
-    </div>
+    </Card>
   )
 }

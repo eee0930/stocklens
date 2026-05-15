@@ -10,26 +10,35 @@ interface LoadingStateProps {
 
 export default function LoadingState({ steps, currentStep }: LoadingStateProps) {
   return (
-    <div className="loading-page">
-      <div className="loading-spinner" />
+    <div className="min-h-screen flex flex-col items-center justify-center gap-7 bg-bg p-6">
+      <div
+        className="w-[60px] h-[60px] rounded-full border-[3px] border-border-light border-t-accent"
+        style={{ animation: 'spin 0.8s linear infinite' }}
+      />
 
-      <div style={{ textAlign: 'center', marginBottom: 8 }}>
-        <div style={{ fontSize: 22, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>
-          데이터 분석 중
-        </div>
-        <div style={{ fontSize: 15, color: 'var(--text-muted)' }}>잠시만 기다려주세요</div>
+      <div className="text-center mb-2">
+        <div className="text-[22px] font-semibold text-fg mb-1.5">데이터 분석 중</div>
+        <div className="text-[15px] text-fg-muted">잠시만 기다려주세요</div>
       </div>
 
-      <div className="loading-steps">
+      <div className="flex flex-col gap-2.5 min-w-[300px]">
         {steps.map((s, i) => {
           const isDone   = i < currentStep
           const isActive = i === currentStep
           return (
             <div
               key={s.id}
-              className={`loading-step${isActive ? ' active' : ''}${isDone ? ' done' : ''}`}
+              className={[
+                'flex items-center gap-3 text-base px-4 py-2.5 rounded-xl transition-all',
+                isActive ? 'text-fg bg-surface-1 border border-border' : '',
+                isDone   ? 'text-green' : '',
+                !isActive && !isDone ? 'text-fg-muted' : '',
+              ].join(' ')}
             >
-              <span className="loading-step-dot" />
+              <span
+                className="w-2 h-2 rounded-full bg-current shrink-0"
+                style={isActive ? { animation: 'pulse 1s ease infinite', background: '#4f8ef7' } : undefined}
+              />
               {isDone
                 ? <span>✓ {s.label.replace('중...', '완료')}</span>
                 : <span>{s.label}</span>}

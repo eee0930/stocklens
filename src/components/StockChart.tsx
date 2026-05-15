@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { createChart, ColorType, CrosshairMode } from 'lightweight-charts'
+import { CardHeader, CardTitle } from '@/components/ui/card'
 import type { ChartPoint, VolumePoint, SMA20Point } from '../types'
 
 interface StockChartProps {
@@ -22,7 +23,6 @@ export default function StockChart({ chartData, volumeData, sma20Data, symbol: _
     const chartH    = isMobile ? 220 : 320
     const volH      = isMobile ? 60  : 80
 
-    // ── Main chart
     const chart = createChart(container, {
       layout: {
         background: { type: ColorType.Solid, color: 'transparent' },
@@ -46,7 +46,6 @@ export default function StockChart({ chartData, volumeData, sma20Data, symbol: _
 
     chartRef.current = chart
 
-    // Candlestick
     const candleSeries = chart.addCandlestickSeries({
       upColor:      '#f87171',
       downColor:    '#60a5fa',
@@ -56,7 +55,6 @@ export default function StockChart({ chartData, volumeData, sma20Data, symbol: _
       priceScaleId: 'right'
     })
 
-    // Volume (histogram on separate scale)
     const volumeSeries = chart.addHistogramSeries({
       priceFormat:    { type: 'volume' },
       priceScaleId:   'volume',
@@ -66,7 +64,6 @@ export default function StockChart({ chartData, volumeData, sma20Data, symbol: _
       scaleMargins: { top: 0.8, bottom: 0 }
     })
 
-    // SMA 20 overlay
     const sma20Series = chart.addLineSeries({
       color:          '#fbbf24',
       lineWidth:      1,
@@ -82,7 +79,6 @@ export default function StockChart({ chartData, volumeData, sma20Data, symbol: _
 
     chart.timeScale().fitContent()
 
-    // Apply default 1M range
     const initialSlice = chartData.slice(-21)
     if (initialSlice.length) {
       chart.timeScale().setVisibleRange({
@@ -91,7 +87,6 @@ export default function StockChart({ chartData, volumeData, sma20Data, symbol: _
       })
     }
 
-    // Resize handler
     const ro = new ResizeObserver(() => {
       if (!container) return
       const w  = container.clientWidth
@@ -110,7 +105,6 @@ export default function StockChart({ chartData, volumeData, sma20Data, symbol: _
     }
   }, [chartData, volumeData, sma20Data])
 
-  // Range selector
   const applyRange = (r: string) => {
     setRange(r)
     if (!chartRef.current || !chartData?.length) return
@@ -124,33 +118,38 @@ export default function StockChart({ chartData, volumeData, sma20Data, symbol: _
 
   return (
     <div>
-      <div className="card-header" style={{ padding: '12px 20px' }}>
-        <span className="card-title">차트</span>
-        <div className="chart-tabs">
+      <CardHeader className="px-5 py-3">
+        <CardTitle>차트</CardTitle>
+        <div className="flex gap-1">
           {['1W', '1M', '3M', '1Y', '5Y', 'ALL'].map((r) => (
             <button
               key={r}
-              className={`chart-tab${range === r ? ' active' : ''}`}
+              className={[
+                'bg-transparent border rounded-md px-2.5 py-1 text-xs font-medium cursor-pointer transition-all',
+                range === r
+                  ? 'bg-surface-3 border-border-light text-fg'
+                  : 'border-transparent text-fg-muted hover:text-fg-secondary',
+              ].join(' ')}
               onClick={() => applyRange(r)}
             >
               {r}
             </button>
           ))}
         </div>
+      </CardHeader>
+
+      <div className="px-1 pb-1">
+        <div ref={mainRef} className="w-full" />
       </div>
 
-      <div style={{ padding: '0 4px 4px' }}>
-        <div ref={mainRef} style={{ width: '100%' }} />
-      </div>
-
-      <div style={{ padding: '8px 20px 12px', display: 'flex', gap: 16 }}>
-        <span className="volume-indicator">
-          <span className="volume-dot" style={{ background: '#f87171' }} /> 상승
+      <div className="px-5 py-3 flex gap-4">
+        <span className="flex items-center gap-1.5 text-[11px] text-fg-muted">
+          <span className="w-1.5 h-1.5 rounded-full bg-red inline-block" /> 상승
         </span>
-        <span className="volume-indicator">
-          <span className="volume-dot" style={{ background: '#60a5fa' }} /> 하락
+        <span className="flex items-center gap-1.5 text-[11px] text-fg-muted">
+          <span className="w-1.5 h-1.5 rounded-full bg-blue inline-block" /> 하락
         </span>
-        <span className="volume-indicator" style={{ color: '#fbbf24' }}>— SMA 20</span>
+        <span className="flex items-center gap-1.5 text-[11px] text-yellow">— SMA 20</span>
       </div>
     </div>
   )
