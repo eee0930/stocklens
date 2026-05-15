@@ -12,7 +12,7 @@ function ScoreRing({ score }: ScoreRingProps) {
   const color    = getScoreColor(score)
 
   return (
-    <div className="relative w-20 h-20 shrink-0">
+    <div className="relative w-[80px] h-[80px] shrink-0">
       <svg width="80" height="80" viewBox="0 0 80 80" style={{ transform: 'rotate(-90deg)' }}>
         <circle cx="40" cy="40" r={r} fill="none" stroke="#1f2330" strokeWidth="5" />
         <circle
