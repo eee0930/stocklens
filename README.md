@@ -23,21 +23,21 @@
 ## 기술 스택
 
 ### Frontend
-| 항목 | 버전 | 설명 |
-|------|------|------|
-| React | 18.3 | UI 컴포넌트 |
-| TypeScript | 6.0 | 타입 안전성 |
-| Vite | 5.4 | 번들러 및 개발 서버 |
-| React Router | 6 | URL 기반 네비게이션 |
-| TanStack Query | 5 | 서버 상태 관리 및 캐싱 |
-| TradingView Lightweight Charts | 4.2 | 캔들스틱 차트 |
-| technicalindicators | 3.1 | RSI · MACD · SMA 계산 |
+| 항목 | 버전 |
+|------|------|
+| React | 18.3 |
+| TypeScript | 6.0 |
+| Vite | 5.4 |
+| React Router | 6 |
+| TanStack Query | 5 |
+| TradingView Lightweight Charts | 4.2 |
+| technicalindicators | 3.1 |
 
 ### Backend (Vercel Serverless Functions)
 | 항목 | 버전 | 설명 |
 |------|------|------|
 | yahoo-finance2 | 3.14 | 주가 · 펀더멘털 · ETF 보유 종목 데이터 |
-| Gemini API | - | AI 투자 분석 (gemini-2.0-flash-lite → flash 순 폴백) |
+| Gemini API | - | AI 투자 분석 |
 
 ### 스타일
 - 순수 CSS (프레임워크 없음), 다크 테마 기반 디자인
@@ -47,7 +47,7 @@
 
 ## 요구 환경
 
-- **Node.js** v18 이상
+- **Node.js** v24.15.0 (v18 이상)
 - **Gemini API 키** — [Google AI Studio](https://aistudio.google.com/app/apikey) 에서 무료 발급
 
 ---
@@ -166,4 +166,4 @@ stocklens/
 
 ## 라이선스
 
-MIT
+MIT © eee0930
