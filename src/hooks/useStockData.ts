@@ -54,6 +54,7 @@ export function useStockData(symbol: string) {
 
   const step = chartQuery.isLoading || summaryQuery.isLoading ? 0
              : !stockData                                      ? 1
+             : analysisQuery.isLoading                         ? 2
              : 3
 
   return { chartQuery, summaryQuery, stockData, analysisQuery, step }
