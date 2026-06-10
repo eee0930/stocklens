@@ -70,11 +70,21 @@ export default function SearchPage({ onSearch }: SearchPageProps) {
             autoFocus
           />
           <button
-            className="shrink-0 bg-accent border-none rounded-full px-5 py-3.5 sm:py-2.5 text-sm font-semibold text-white cursor-pointer hover:opacity-90 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="shrink-0 w-[64px] flex items-center justify-center bg-accent border-none rounded-full py-3.5 sm:py-2.5 text-sm font-semibold text-white cursor-pointer hover:opacity-90 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             onClick={() => submit(query)}
             disabled={loading || !query.trim()}
           >
-            {loading ? '검색 중...' : '분석'}
+            {loading ? (
+              <span className="flex items-center gap-[3px]">
+                {[0, 1, 2].map((i) => (
+                  <span
+                    key={i}
+                    className="block w-[4px] h-[4px] rounded-full bg-white"
+                    style={{ animation: `dotBounce 1s ease infinite`, animationDelay: `${i * 0.15}s` }}
+                  />
+                ))}
+              </span>
+            ) : '분석'}
           </button>
         </div>
 
