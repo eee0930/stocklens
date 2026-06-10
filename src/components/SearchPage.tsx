@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const US_EXAMPLES = ['NVDA', 'SMH', 'SCHD', 'VOO', 'QQQ']
+const US_EXAMPLES = ['NVDA', 'SMH', 'SCHD', 'VOO', 'QQQ', 'UFO']
 const KR_EXAMPLES = ['삼성전자', 'SK하이닉스', '현대차', 'KODEX 미국나스닥100', 'TIGER 미국S&P500']
 
 interface SearchPageProps {
