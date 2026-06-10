@@ -56,12 +56,12 @@ export default function SearchPage({ onSearch }: SearchPageProps) {
 
       {/* Search */}
       <div className="w-full max-w-[600px] fade-in-delay">
-        <div className="flex items-center bg-surface-1 border border-border-light rounded-full py-3 sm:py-1.5 pl-5 pr-1.5 transition-all focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/25">
+        <div className="flex items-center bg-surface-1 border border-border-light rounded-full py-1.5 pl-5 pr-1.5 transition-all focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/25">
           <svg className="text-fg-muted shrink-0 mr-3" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
           <input
-            className="flex-1 bg-transparent border-none outline-none text-base text-fg min-w-0 placeholder:text-fg-muted"
+            className="flex-1 bg-transparent border-none outline-none text-base text-fg min-w-0 placeholder:text-fg-muted py-3 sm:py-0"
             type="text"
             placeholder="종목명 또는 티커 입력"
             value={query}
@@ -70,7 +70,7 @@ export default function SearchPage({ onSearch }: SearchPageProps) {
             autoFocus
           />
           <button
-            className="shrink-0 bg-accent border-none rounded-full px-5 py-3.5 sm:py-2.5 text-sm font-semibold text-white cursor-pointer hover:opacity-90 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="shrink-0 bg-accent border-none rounded-full px-5 py-3 sm:py-2.5 text-sm font-semibold text-white cursor-pointer hover:opacity-90 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             onClick={() => submit(query)}
             disabled={loading || !query.trim()}
           >
