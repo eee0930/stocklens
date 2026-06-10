@@ -5,20 +5,39 @@ type Handler = (req: any, res: any) => Promise<void>
 // ── inlined from shared/geminiAnalysis.ts ──────────────────────────────────
 
 function buildPrompt(d: Record<string, unknown>): string {
-  const n = (v: unknown, suffix = '') => v != null ? `${v}${suffix}` : 'N/A'
+  const n   = (v: unknown, suffix = '') => v != null ? `${v}${suffix}` : 'N/A'
   const pct = (v: unknown) => typeof v === 'number' ? v.toFixed(1) + '%' : (v != null ? `${v}%` : 'N/A')
   const price = typeof d.currentPrice === 'number' ? '$' + d.currentPrice.toFixed(2) : 'N/A'
+  const desc  = typeof d.description === 'string' && d.description
+    ? `\n사업 개요: ${d.description.slice(0, 400)}`
+    : ''
 
-  return `주식 애널리스트로서 아래 데이터를 기반으로 투자 의견을 분석하세요.
+  return `당신은 월스트리트 수석 애널리스트입니다. 아래 데이터를 바탕으로 ${d.companyName}(${d.symbol})에 대한 심층 투자 분석을 작성하세요.
 
-종목: ${d.companyName} (${d.symbol}) / 섹터: ${n(d.sector)} / 현재가: ${price}
+[종목 정보]
+회사명: ${d.companyName} (${d.symbol})
+섹터: ${n(d.sector)} | 산업: ${n(d.industry)}
+현재가: ${price} | 시가총액: ${n(d.marketCapFormatted)} | 베타: ${n(d.beta)}${desc}
 
-[기술 지표] 7일 수익률: ${pct(d.sevenDayReturn)} | RSI: ${typeof d.rsi === 'number' ? d.rsi.toFixed(1) : 'N/A'} | MACD 히스토: ${typeof d.macdHistogram === 'number' ? d.macdHistogram.toFixed(4) : 'N/A'} | 20일 이평선 대비: ${pct(d.priceVsSMA20)} | 52주 고점 대비: ${pct(d.priceVs52High)}
+[기술적 지표]
+RSI(14): ${typeof d.rsi === 'number' ? d.rsi.toFixed(1) : 'N/A'}
+MACD 히스토그램: ${typeof d.macdHistogram === 'number' ? d.macdHistogram.toFixed(4) : 'N/A'}
+20일 이평선 대비: ${pct(d.priceVsSMA20)}
+7일 수익률: ${pct(d.sevenDayReturn)}
+52주 고점 대비: ${pct(d.priceVs52High)} | 52주 저점 대비: ${pct(d.priceVs52Low)}
+거래량 증감률(20일 평균 대비): ${pct(d.volumeGrowthRate)}
 
-[펀더멘털] 실적 성장(YoY): ${n(d.earningsGrowth, '%')} | 영업이익률: ${n(d.operatingMargin, '%')} | P/E: ${n(d.peRatio)}
+[펀더멘털]
+P/E: ${n(d.peRatio)} | 실적 성장(YoY): ${n(d.earningsGrowth, '%')} | 영업이익률: ${n(d.operatingMargin, '%')}
 
-아래 JSON만 반환 (다른 텍스트 금지):
-{"score":<0-100>,"recommendation":"<강력매수|매수|중립|매도|강력매도>","outlook":"<단기 1~2문장>","longTermOutlook":"<장기 매수 타이밍 조언 1~2문장>","reasons":["<근거1>","<근거2>"],"risks":["<리스크1>"]}`
+[분석 지침]
+- outlook: 현재 기술적 지표와 이 회사 고유의 사업 특성을 연결하여 단기(1~4주) 주가 방향성을 3~5문장으로 설명. 수치를 직접 인용할 것.
+- longTermOutlook: 펀더멘털, 섹터 전망, 밸류에이션을 근거로 6~12개월 장기 투자 전략을 3~5문장으로 조언. 매수 타이밍, 목표가 수준, 리스크 관리 방법 포함.
+- reasons: 이 종목만의 구체적 매수/보유 근거 3~4개. 단순 지표 나열이 아닌 "왜 이 수치가 이 회사에서 의미 있는지" 설명.
+- risks: 투자 시 주의해야 할 리스크 2~3개. 섹터·경쟁·거시경제 요인 포함.
+
+아래 JSON만 반환 (설명 텍스트, 마크다운 금지):
+{"score":<0-100>,"recommendation":"<강력매수|매수|중립|매도|강력매도>","outlook":"<3~5문장>","longTermOutlook":"<3~5문장>","reasons":["<근거1>","<근거2>","<근거3>"],"risks":["<리스크1>","<리스크2>"]}`
 }
 
 function parseGeminiResponse(text: string): Record<string, unknown> {
@@ -85,21 +104,32 @@ function ruleBasedAnalysis(d: Record<string, unknown>): Record<string, unknown> 
   else if (score >= 33) recommendation = '매도'
   else                  recommendation = '강력매도'
 
-  const outlook = `${d.companyName}(${d.symbol})의 기술적 지표를 종합하면 단기 ${recommendation} 의견입니다. RSI·MACD·이동평균 등 정량 지표 기반 규칙 분석 결과입니다.`
+  const rsiDesc = rsi != null
+    ? rsi < 30 ? `RSI ${rsi.toFixed(1)}로 과매도 구간` : rsi > 70 ? `RSI ${rsi.toFixed(1)}로 과매수 구간` : `RSI ${rsi.toFixed(1)}`
+    : null
+  const macdDesc = macdHistogram != null
+    ? macdHistogram > 0 ? 'MACD 히스토그램 양수(상승 모멘텀)' : 'MACD 히스토그램 음수(하락 모멘텀)'
+    : null
+  const smaDesc = priceVsSMA20 != null
+    ? priceVsSMA20 > 0 ? `20일 이평선 +${priceVsSMA20.toFixed(1)}% 위` : `20일 이평선 ${priceVsSMA20.toFixed(1)}% 하회`
+    : null
+  const indicators = [rsiDesc, macdDesc, smaDesc].filter(Boolean).join(', ')
+
+  const outlook = `${d.companyName}(${d.symbol})의 단기 기술적 신호는 ${recommendation} 구간입니다. ${indicators ? `현재 ${indicators} 상태로` : ''} 정량 지표를 종합한 점수는 ${score}점(100점 만점)입니다. Gemini AI 분석을 사용할 수 없어 규칙 기반 분석으로 대체되었습니다.`
 
   let longTermOutlook: string
   if (earningsGrowth != null && earningsGrowth > 15 && priceVs52High != null && priceVs52High > -10) {
-    longTermOutlook = `실적 성장세(+${earningsGrowth}%)가 탄탄하지만 현재 52주 고점 근처입니다. 장기 투자 가치는 충분하나 단기 조정 가능성을 고려해 분할 매수를 추천합니다.`
+    longTermOutlook = `실적 성장률 +${earningsGrowth}%로 펀더멘털이 탄탄하지만, 현재가가 52주 고점 ${Math.abs(priceVs52High).toFixed(1)}% 이내로 고점 부담이 있습니다. 장기 투자 가치는 있으나 단기 조정 시 분할 매수 진입을 권장합니다.`
   } else if (earningsGrowth != null && earningsGrowth > 15 && priceVs52Low != null && priceVs52Low < 20) {
-    longTermOutlook = `실적 성장성이 높고 52주 저점 근처의 저렴한 가격대입니다. 장기 보유 목적이라면 지금도 좋은 진입 시점으로 볼 수 있습니다.`
+    longTermOutlook = `실적 성장률 +${earningsGrowth}%의 높은 성장성을 보유하면서 52주 저점 +${priceVs52Low.toFixed(1)}% 수준의 저렴한 가격대입니다. 장기 보유 목적이라면 현재 구간이 매력적인 진입 시점입니다.`
   } else if (priceVs52Low != null && priceVs52Low < 15) {
-    longTermOutlook = `52주 저점에 가까운 구간으로 장기 투자자에게 매력적인 가격대입니다. 분할 매수를 고려해볼 만합니다.`
+    longTermOutlook = `현재가가 52주 저점 +${priceVs52Low.toFixed(1)}% 수준으로 역사적 저가 구간입니다. 추가 하락 리스크를 고려해 소량씩 분할 매수하는 전략이 유효합니다.`
   } else if (priceVs52High != null && priceVs52High < -30) {
-    longTermOutlook = `고점 대비 큰 폭으로 하락한 상태입니다. 장기 관점에서는 충분한 조정이 이뤄졌을 수 있어 분할 매수 전략이 유효합니다.`
+    longTermOutlook = `52주 고점 대비 ${Math.abs(priceVs52High).toFixed(1)}% 하락한 상태로 상당한 조정이 진행됐습니다. 하락 원인이 일시적이라면 장기 분할 매수 관점에서 접근할 만합니다.`
   } else if (score >= 65) {
-    longTermOutlook = `전반적인 지표가 양호합니다. 단기 과열 시 소폭 조정을 기다린 후 진입하거나 지금 일부 매수 후 추가 하락 시 분할 매수하는 전략을 추천합니다.`
+    longTermOutlook = `전반적인 기술적 지표(점수 ${score}점)가 양호한 수준입니다. 단기 과열 시 소폭 조정 후 진입하거나, 현재 일부 매수 후 추가 하락 시 비중을 늘리는 분할 매수 전략을 권장합니다.`
   } else {
-    longTermOutlook = `현재 뚜렷한 방향성이 없는 구간입니다. 명확한 추세 전환 신호 후 진입하거나 소액씩 분할 매수를 시작하는 방법 모두 유효합니다.`
+    longTermOutlook = `현재 기술적 지표(점수 ${score}점)는 방향성이 불명확한 구간입니다. 추세 전환 신호(RSI 반등, MACD 골든크로스 등) 확인 후 진입하거나 소액씩 분할 매수를 시작하는 방법 모두 유효합니다.`
   }
 
   return { score, recommendation, outlook, longTermOutlook, reasons: reasons.slice(0, 3), risks: risks.slice(0, 2) }
