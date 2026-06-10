@@ -14,9 +14,7 @@ const handler: Handler = async (req, res) => {
       period1: fiveYrsAgo,
       period2: new Date(),
       interval: '1d',
-      events: 'history',
       includePrePost: false,
-      includeAdjustedClose: true,
     }, { validateResult: false })
 
     const rows = (result.quotes ?? [])
