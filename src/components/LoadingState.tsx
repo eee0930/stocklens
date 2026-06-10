@@ -6,9 +6,10 @@ interface Step {
 interface LoadingStateProps {
   steps: Step[]
   currentStep: number
+  onStop?: () => void
 }
 
-export default function LoadingState({ steps, currentStep }: LoadingStateProps) {
+export default function LoadingState({ steps, currentStep, onStop }: LoadingStateProps) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-7 bg-bg p-6">
       <div
@@ -46,6 +47,15 @@ export default function LoadingState({ steps, currentStep }: LoadingStateProps) 
           )
         })}
       </div>
+
+      {onStop && (
+        <button
+          onClick={onStop}
+          className="mt-2 bg-transparent border border-border-light rounded-xl px-5 py-2 text-[13px] font-medium text-fg-muted cursor-pointer hover:border-red/50 hover:text-red/80 transition-all"
+        >
+          ✕ 중지
+        </button>
+      )}
     </div>
   )
 }

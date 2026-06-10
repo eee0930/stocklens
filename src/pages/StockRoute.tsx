@@ -33,5 +33,5 @@ export default function StockRoute() {
     />
   )
 
-  return <LoadingState steps={STEPS} currentStep={step} />
+  return <LoadingState steps={STEPS} currentStep={step} onStop={handleBack} />
 }
