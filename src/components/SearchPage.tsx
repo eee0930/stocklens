@@ -56,7 +56,7 @@ export default function SearchPage({ onSearch }: SearchPageProps) {
 
       {/* Search */}
       <div className="w-full max-w-[600px] fade-in-delay">
-        <div className="flex items-center bg-surface-1 border border-border-light rounded-full py-1.5 pl-5 pr-1.5 transition-all focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/25">
+        <div className="flex items-center bg-surface-1 border border-border-light rounded-full py-3 sm:py-1.5 pl-5 pr-1.5 transition-all focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/25">
           <svg className="text-fg-muted shrink-0 mr-3" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
@@ -84,7 +84,7 @@ export default function SearchPage({ onSearch }: SearchPageProps) {
           </div>
         )}
 
-        <div className="mt-4 text-center text-xs text-fg-muted flex items-center justify-center gap-2 flex-wrap">
+        <div className="mt-7 sm:mt-4 text-center text-xs text-fg-muted flex items-center justify-center gap-2 flex-wrap">
           <span className="text-sm leading-none">🇺🇸</span>
           {US_EXAMPLES.map((ex) => (
             <button
