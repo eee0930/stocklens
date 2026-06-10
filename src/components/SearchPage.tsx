@@ -70,7 +70,7 @@ export default function SearchPage({ onSearch }: SearchPageProps) {
             autoFocus
           />
           <button
-            className="shrink-0 bg-accent border-none rounded-full px-5 py-2.5 text-sm font-semibold text-white cursor-pointer hover:opacity-90 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="shrink-0 bg-accent border-none rounded-full px-5 py-3.5 sm:py-2.5 text-sm font-semibold text-white cursor-pointer hover:opacity-90 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             onClick={() => submit(query)}
             disabled={loading || !query.trim()}
           >
