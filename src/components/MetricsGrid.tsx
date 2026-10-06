@@ -68,7 +68,7 @@ function MetricCard({ label, value, sub, valueClass, barPercent, barColor, extra
           onMouseLeave={() => { if (!touchActiveRef.current) setShowTip(false) }}
         >
           <button
-            className="w-[18px] h-[18px] rounded-full bg-surface-3 border border-border-light text-fg-muted text-[10px] font-bold cursor-pointer flex items-center justify-center hover:border-accent hover:text-accent transition-colors"
+            className="w-[18px] h-[18px] rounded-full bg-surface-3 border border-border-light text-fg-secondary text-[10px] font-bold cursor-pointer flex items-center justify-center hover:border-accent hover:text-accent transition-colors"
             onTouchStart={() => {
               touchActiveRef.current = true
               setTimeout(() => { touchActiveRef.current = false }, 600)
