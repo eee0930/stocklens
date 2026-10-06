@@ -80,3 +80,16 @@ export interface SearchResult {
   quoteType: string
   exchange: string
 }
+
+export interface RecommendedStock {
+  name: string
+  symbol: string
+  price: number
+  volume: number
+  changePercent: number
+}
+
+export interface RecommendResult {
+  found: boolean
+  stocks: RecommendedStock[]
+}

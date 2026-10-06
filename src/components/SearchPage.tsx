@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const US_EXAMPLES = ['NVDA', 'SMH', 'SCHD', 'VOO', 'QQQ', 'UFO']
 const KR_EXAMPLES = ['삼성전자', 'SK하이닉스', '현대차', 'KODEX 미국나스닥100', 'TIGER 미국S&P500']
@@ -8,6 +9,7 @@ interface SearchPageProps {
 }
 
 export default function SearchPage({ onSearch }: SearchPageProps) {
+  const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -117,6 +119,15 @@ export default function SearchPage({ onSearch }: SearchPageProps) {
               {ex}
             </button>
           ))}
+        </div>
+
+        <div className="mt-5 flex justify-center">
+          <button
+            className="bg-surface-1 border border-border-light rounded-full px-4 py-2 text-xs font-medium text-fg-secondary cursor-pointer hover:border-accent hover:text-accent transition-all"
+            onClick={() => navigate('/recommend')}
+          >
+            ✨ Gemini 추천 미국 종목
+          </button>
         </div>
       </div>
 

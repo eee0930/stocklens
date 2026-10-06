@@ -1,6 +1,6 @@
 import type { Plugin } from 'vite'
 import type { IncomingMessage, ServerResponse } from 'http'
-import { buildPrompt, parseGeminiResponse, ruleBasedAnalysis } from '../api/analyze'
+import { buildPrompt, parseGeminiResponse, ruleBasedAnalysis, geminiModels as models } from '../api/analyze'
 
 const rateLimitedUntil = new Map<string, number>()
 
@@ -15,8 +15,6 @@ function setRateLimited(model: string, retryAfterSec: number) {
   rateLimitedUntil.set(model, Date.now() + retryAfterSec * 1000)
   console.log(`[dev] ${model} rate-limited for ${retryAfterSec}s`)
 }
-
-const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite']
 
 async function callGemini(modelName: string, prompt: string, apiKey: string): Promise<string> {
   const controller = new AbortController()

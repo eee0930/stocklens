@@ -2,6 +2,8 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Handler = (req: any, res: any) => Promise<void>
 
+export const geminiModels = ['gemini-2.5-flash', 'gemini-flash-latest', 'gemini-flash-lite-latest']
+
 // ── inlined from shared/geminiAnalysis.ts ──────────────────────────────────
 
 export function buildPrompt(d: Record<string, unknown>): string {
@@ -230,7 +232,7 @@ const handler: Handler = async (req, res) => {
   }
 
   const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
-  const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite']
+  const models = geminiModels
   let text: string | null = null
   let bestRetryMs: number | null = null
   let authError: GeminiError | null = null
