@@ -85,7 +85,7 @@ export interface RecommendedStock {
   name: string
   symbol: string
   price: number
-  volume: number
+  volumeIncreasePercent: number
   changePercent: number
 }
 

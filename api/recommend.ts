@@ -18,7 +18,7 @@ export function buildRecommendPrompt(): string {
 
 아래 JSON만 반환 (다른 텍스트 금지):
 조건을 만족하는 종목이 있으면:
-{"found":true,"stocks":[{"name":"<종목명>","symbol":"<티커>","price":<현재가 숫자>,"volume":<최근 거래량 숫자>,"changePercent":<1개월 상승률 숫자>}]}
+{"found":true,"stocks":[{"name":"<종목명>","symbol":"<티커>","price":<현재가 숫자>,"volumeIncreasePercent":<④번 조건의 거래량 증가율(%). (최근 20거래일 평균 거래량 ÷ 이전 20거래일 평균 거래량 - 1) × 100>,"changePercent":<1개월 상승률 숫자>}]}
 조건을 만족하는 종목이 하나도 없으면:
 {"found":false,"stocks":[]}`
 }
@@ -27,7 +27,7 @@ interface RecommendedStockRaw {
   name?: unknown
   symbol?: unknown
   price?: unknown
-  volume?: unknown
+  volumeIncreasePercent?: unknown
   changePercent?: unknown
 }
 

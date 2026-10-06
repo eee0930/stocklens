@@ -1,5 +1,28 @@
+import { useState } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import type { RecommendResult } from '../types'
+
+const VOLUME_CONDITION_TEXT = '최근 20거래일 평균 거래량 ÷ 이전 20거래일 평균 거래량 ≥ 3'
+
+function HeaderTooltip({ text }: { text: string }) {
+  const [show, setShow] = useState(false)
+  return (
+    <span
+      className="relative inline-flex"
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+    >
+      <span className="w-[14px] h-[14px] rounded-full bg-surface-3 border border-border-light text-fg-secondary text-[9px] font-bold normal-case cursor-default flex items-center justify-center">
+        !
+      </span>
+      {show && (
+        <span className="absolute top-[calc(100%+6px)] right-0 w-[220px] bg-surface-2 border border-border-light rounded-xl p-2.5 text-[11px] leading-[1.6] text-fg-secondary normal-case tracking-normal font-normal whitespace-normal text-left z-[999] shadow-[0_8px_24px_rgba(0,0,0,0.45)]">
+          {text}
+        </span>
+      )}
+    </span>
+  )
+}
 
 interface RecommendPageProps {
   result: RecommendResult
@@ -53,7 +76,12 @@ export default function RecommendPage({ result, onBack, onSearch }: RecommendPag
                   <tr className="border-b border-border">
                     <th className="text-left px-5 py-2.5 text-[11px] font-medium text-fg-muted uppercase tracking-wide">종목명</th>
                     <th className="text-right px-5 py-2.5 text-[11px] font-medium text-fg-muted uppercase tracking-wide">주가</th>
-                    <th className="text-right px-5 py-2.5 text-[11px] font-medium text-fg-muted uppercase tracking-wide">거래량</th>
+                    <th className="text-right px-5 py-2.5 text-[11px] font-medium text-fg-muted uppercase tracking-wide">
+                      <span className="inline-flex items-center justify-end gap-1">
+                        거래량 증가율
+                        <HeaderTooltip text={VOLUME_CONDITION_TEXT} />
+                      </span>
+                    </th>
                     <th className="text-right px-5 py-2.5 text-[11px] font-medium text-fg-muted uppercase tracking-wide">1개월 상승률</th>
                   </tr>
                 </thead>
@@ -71,8 +99,8 @@ export default function RecommendPage({ result, onBack, onSearch }: RecommendPag
                       <td className="px-5 py-3 text-right text-[13px] font-mono text-fg">
                         ${s.price?.toFixed(2)}
                       </td>
-                      <td className="px-5 py-3 text-right text-[13px] font-mono text-fg">
-                        {s.volume?.toLocaleString()}
+                      <td className="px-5 py-3 text-right text-[13px] font-mono font-semibold text-accent">
+                        {typeof s.volumeIncreasePercent === 'number' ? `+${s.volumeIncreasePercent.toFixed(0)}%` : 'N/A'}
                       </td>
                       <td className={['px-5 py-3 text-right text-[13px] font-mono font-semibold', s.changePercent >= 0 ? 'text-red' : 'text-blue'].join(' ')}>
                         {s.changePercent >= 0 ? '+' : ''}{s.changePercent?.toFixed(2)}%

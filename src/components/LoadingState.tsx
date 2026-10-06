@@ -50,7 +50,7 @@ export default function LoadingState({ steps, currentStep, onStop, description }
       </div>
 
       {description && (
-        <div className="max-w-[360px] text-center text-[13px] text-fg-muted leading-[1.6] px-4 whitespace-pre-line">
+        <div className="max-w-[520px] text-center text-[13px] text-fg-muted leading-[1.6] px-4 whitespace-pre-line">
           {description}
         </div>
       )}
