@@ -25,7 +25,10 @@ async function callGemini(modelName: string, prompt: string, apiKey: string): Pr
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { responseMimeType: 'application/json' },
+        }),
         signal: controller.signal,
       }
     )
@@ -102,12 +105,14 @@ export function geminiPlugin(): Plugin {
             res.end(JSON.stringify(data))
           }
 
-          if (text !== null) {
-            send(parseGeminiResponse(text))
+          const analysis = text !== null ? parseGeminiResponse(text) : null
+          if (analysis) {
+            send(analysis)
           } else {
-            console.error('[dev] All Gemini models failed:', modelErrors.join(' | '))
+            const reason = text !== null ? 'Gemini 응답 파싱 실패' : modelErrors.join(' | ')
+            console.error('[dev] Gemini analysis failed:', reason)
             const fallback = ruleBasedAnalysis(d)
-            send({ ...fallback, isRuleBased: true, geminiError: modelErrors.join(' | ') })
+            send({ ...fallback, isRuleBased: true, geminiError: reason })
           }
         })
       })

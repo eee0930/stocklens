@@ -42,12 +42,12 @@ P/E: ${n(d.peRatio)} | 실적 성장(YoY): ${n(d.earningsGrowth, '%')} | 영업�
 {"score":<0-100>,"recommendation":"<강력매수|매수|중립|매도|강력매도>","outlook":"<3~5문장>","longTermOutlook":"<3~5문장>","reasons":["<근거1>","<근거2>","<근거3>"],"risks":["<리스크1>","<리스크2>"]}`
 }
 
-export function parseGeminiResponse(text: string): Record<string, unknown> {
+export function parseGeminiResponse(text: string): Record<string, unknown> | null {
   try {
     const m = text.match(/\{[\s\S]*\}/)
     return JSON.parse(m ? m[0] : text) as Record<string, unknown>
   } catch {
-    return { score: 50, recommendation: '중립', outlook: text, reasons: [], risks: [] }
+    return null
   }
 }
 
@@ -198,7 +198,10 @@ const handler: Handler = async (req, res) => {
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: buildPrompt(d) }] }] }),
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: buildPrompt(d) }] }],
+            generationConfig: { responseMimeType: 'application/json' },
+          }),
           signal: controller.signal,
         }
       )
@@ -281,6 +284,10 @@ const handler: Handler = async (req, res) => {
   }
 
   const analysis = parseGeminiResponse(text)
+  if (!analysis) {
+    const fallback = ruleBasedAnalysis(d)
+    return res.status(200).json({ ...fallback, isRuleBased: true, geminiError: 'Gemini 응답 파싱 실패' })
+  }
   setServerCached(d.symbol as string, analysis)
   return res.status(200).json(analysis)
 }

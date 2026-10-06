@@ -74,7 +74,10 @@ const handler: Handler = async (req, res) => {
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: buildRecommendPrompt() }] }] }),
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: buildRecommendPrompt() }] }],
+            generationConfig: { responseMimeType: 'application/json' },
+          }),
           signal: controller.signal,
         }
       )

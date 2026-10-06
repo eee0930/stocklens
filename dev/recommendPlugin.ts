@@ -11,7 +11,10 @@ async function callGemini(modelName: string, prompt: string, apiKey: string): Pr
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { responseMimeType: 'application/json' },
+        }),
         signal: controller.signal,
       }
     )
