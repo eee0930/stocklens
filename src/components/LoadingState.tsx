@@ -7,9 +7,10 @@ interface LoadingStateProps {
   steps: Step[]
   currentStep: number
   onStop?: () => void
+  description?: string
 }
 
-export default function LoadingState({ steps, currentStep, onStop }: LoadingStateProps) {
+export default function LoadingState({ steps, currentStep, onStop, description }: LoadingStateProps) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-7 bg-bg p-6">
       <div
@@ -47,6 +48,12 @@ export default function LoadingState({ steps, currentStep, onStop }: LoadingStat
           )
         })}
       </div>
+
+      {description && (
+        <div className="max-w-[360px] text-center text-[13px] text-fg-muted leading-[1.6] px-4 whitespace-pre-line">
+          {description}
+        </div>
+      )}
 
       {onStop && (
         <button

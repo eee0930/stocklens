@@ -36,5 +36,12 @@ export default function RecommendRoute() {
     return <RecommendPage result={query.data} onBack={handleBack} onSearch={handleSearch} />
   }
 
-  return <LoadingState steps={STEPS} currentStep={0} onStop={handleBack} />
+  return (
+    <LoadingState
+      steps={STEPS}
+      currentStep={0}
+      onStop={handleBack}
+      description={'Gemini 추천 종목은 거래량이 터졌지만 아직 가격이 움직이지 않은 종목입니다.\n시장 상황에 따라 추천하는 종목이 없을 수도 있습니다.'}
+    />
+  )
 }
