@@ -1,6 +1,6 @@
 import type { Plugin } from 'vite'
 import type { IncomingMessage, ServerResponse } from 'http'
-import { buildPrompt, parseGeminiResponse, ruleBasedAnalysis } from '../shared/geminiAnalysis'
+import { buildPrompt, parseGeminiResponse, ruleBasedAnalysis } from '../api/analyze'
 
 const rateLimitedUntil = new Map<string, number>()
 

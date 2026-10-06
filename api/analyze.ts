@@ -4,7 +4,7 @@ type Handler = (req: any, res: any) => Promise<void>
 
 // ── inlined from shared/geminiAnalysis.ts ──────────────────────────────────
 
-function buildPrompt(d: Record<string, unknown>): string {
+export function buildPrompt(d: Record<string, unknown>): string {
   const n   = (v: unknown, suffix = '') => v != null ? `${v}${suffix}` : 'N/A'
   const pct = (v: unknown) => typeof v === 'number' ? v.toFixed(1) + '%' : (v != null ? `${v}%` : 'N/A')
   const price = typeof d.currentPrice === 'number' ? '$' + d.currentPrice.toFixed(2) : 'N/A'
@@ -40,7 +40,7 @@ P/E: ${n(d.peRatio)} | 실적 성장(YoY): ${n(d.earningsGrowth, '%')} | 영업�
 {"score":<0-100>,"recommendation":"<강력매수|매수|중립|매도|강력매도>","outlook":"<3~5문장>","longTermOutlook":"<3~5문장>","reasons":["<근거1>","<근거2>","<근거3>"],"risks":["<리스크1>","<리스크2>"]}`
 }
 
-function parseGeminiResponse(text: string): Record<string, unknown> {
+export function parseGeminiResponse(text: string): Record<string, unknown> {
   try {
     const m = text.match(/\{[\s\S]*\}/)
     return JSON.parse(m ? m[0] : text) as Record<string, unknown>
@@ -49,7 +49,7 @@ function parseGeminiResponse(text: string): Record<string, unknown> {
   }
 }
 
-function ruleBasedAnalysis(d: Record<string, unknown>): Record<string, unknown> {
+export function ruleBasedAnalysis(d: Record<string, unknown>): Record<string, unknown> {
   let score = 50
   const reasons: string[] = []
   const risks: string[] = []
